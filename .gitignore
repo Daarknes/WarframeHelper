@@ -1,0 +1,21 @@
+*.pyc
+
+# Photoshop
+*.psd
+images/
+
+# eclipse / IDE
+.project
+.pydevproject
+.settings/
+
+# temp folder
+tmp/
+
+*.pdf
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.bbl
+*.blg
