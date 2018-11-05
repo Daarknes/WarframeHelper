@@ -1,11 +1,12 @@
 import json
+import os
 
 item_types = ["Melee", "Warframes", "Secondary", "Sentinels", "Primary", "Archwing"]
 # the game apends 'Blueprint' after each warframe part -> adjust data
 warframe_parts = ["CHASSIS", "SYSTEMS", "NEUROPTICS"]
 exclude_type = ["MiscItems"]
 
-with open("raw_item_data.json", "r", encoding="utf-8") as f:
+with open(os.path.join("..", "res", "raw_item_data.json"), "r", encoding="utf-8") as f:
     data = json.loads(f.read())
  
 # start with the forma blueprint
@@ -25,5 +26,5 @@ for item in data:
                  
             items.add(item["name"].upper() + " " + component_name)
  
-with open("item_data.json", "w") as f:
+with open(os.path.join("..", "res", "item_data.json"), "w") as f:
     json.dump(list(items), f, indent="  ")

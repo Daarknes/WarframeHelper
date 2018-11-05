@@ -54,11 +54,12 @@ def debug_market(item_names):
 
 
 if __name__ == "__main__":
-#     debug_ocr_single(os.path.join("..", "images", "03-11-2018_12-46-22.png"))
+    debug_ocr_single(os.path.join("..", "images", "03-11-2018_12-46-22.png"))
+#     debug_ocr_single(os.path.join("..", "images_1080p", "03-11-2018_15-35-35.png"))
 
 #     prof = cProfile.Profile()
 #     prof.enable()
-    debug_market(['EUPHONA PRIME BLUEPRINT', 'KRONEN PRIME BLUEPRINT', 'ZEPHYR PRIME CHASSIS BLUEPRINT', 'EUPHONA PRIME BLUEPRINT'])
+#     debug_market(['EUPHONA PRIME BLUEPRINT', 'KRONEN PRIME BLUEPRINT', 'ZEPHYR PRIME CHASSIS BLUEPRINT', 'EUPHONA PRIME BLUEPRINT'])
 #     prof.disable()
 #     
 #     prof.dump_stats("perftest.cprof")

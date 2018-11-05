@@ -14,13 +14,16 @@ import win32gui
 
 import warframe_ocr
 import wfmarket
-import time
-from PyQt5.QtGui import QPalette, QColor
+from PyQt5.QtGui import QPalette, QColor, QIcon
+import platform
+import ctypes
 
 
 hotkey = "alt+m"
 # saves the screenshot to the 'images/'-folder when the hotkey is pressed (debug)
 save_screenshot = True
+
+price_quantile = 0.3
 
 
 def excepthook(excType, excValue, tracebackobj):
@@ -45,9 +48,9 @@ def excepthook(excType, excValue, tracebackobj):
 class Window(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
-        self.setWindowTitle("Warframe Market Prices")
-#        self.setWindowIcon(QIcon(constants.program + "logo.png"))
-        self.resize(QSize(800, 500))
+        self.setWindowTitle("Warframe Relic Reward Helper")
+        self.setWindowIcon(QIcon(os.path.join("..", "res", "logo.png")))
+        self.resize(QSize(1200, 700))
 
         dummy = QWidget()
         mainLayout = QVBoxLayout(dummy)
@@ -81,10 +84,6 @@ class Window(QMainWindow):
             self.labels.append(label)
             labelLayout.addWidget(label)
 
-    def setLabelText(self, *texts):
-        for label, text in zip(self.labels, texts):
-            label.setText(text)
-
 
 class KeyboardThread(QThread):
     def run(self):
@@ -103,6 +102,10 @@ class KeyboardThread(QThread):
                 print("could not find and focus the Warframe window. Stacktrace:\n", traceback.print_exc(file=sys.stdout))
                 return
             
+            for label in window.labels:
+                label.setText("...")
+                label.setPalette(window.labelDefaultPalette)
+            
             image = ImageGrab.grab((x1, y1, x2, y2))            
             if save_screenshot:
                 if not os.path.exists("../images/"):
@@ -118,7 +121,7 @@ class KeyboardThread(QThread):
              
             item_prices = wfmarket.item_names_to_prices_map(item_names)
             bestLabel = None
-            best_mean = 0
+            best_quantile = 0
 
             offset = 1 if len(item_names) <= 2 else 0
             for i, label in enumerate(window.labels):
@@ -131,16 +134,15 @@ class KeyboardThread(QThread):
                     elif len(prices) == 0:
                         text += "Not sellable"
                     else:
-                        mean = sum(prices) / len(prices)
-                        if mean > best_mean:
-                            best_mean = mean
+                        quantile = prices[int(price_quantile * len(prices))]
+                        if quantile > best_quantile:
+                            best_quantile = quantile
                             bestLabel = label
                         text += "\n".join(map(str, prices))
                 else:
                     text = " - "
 
                 label.setText(text)
-                label.setPalette(window.labelDefaultPalette)
             
             bestLabel.setPalette(window.labelBestPalette)
 
@@ -149,6 +151,10 @@ if __name__ == "__main__":
     sys.excepthook = excepthook
     
     app = QApplication(sys.argv)
+    if platform.system() == "Windows":
+        appId = u'warframe_relic_reward_helper'  # arbitrary string
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(appId)
+    
     window = Window()
     keyboardThread = KeyboardThread()
     

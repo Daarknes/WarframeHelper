@@ -6,13 +6,13 @@ import traceback
 import cv2
 import pytesseract
 
-from decorators import benchmark
-import matplotlib.pyplot as plt
+# from decorators import benchmark
+# import matplotlib.pyplot as plt
 import numpy as np
 import math
-import time
 import multiprocessing
 from concurrent.futures.process import ProcessPoolExecutor
+import os
 
 
 pytesseract.pytesseract.tesseract_cmd = r'E:\Tesseract\tesseract.exe'
@@ -48,7 +48,10 @@ def _get_part_boxes(npimage):
     spacing = int(math.ceil(ref_spacing * sw))
     part_width = int(math.ceil(ref_part_width * sw))
     
-    num_players = _get_num_players(npimage[ymin:ymax], sw, sh)
+    # we can crop in x-coordinates because num_players <= 4
+    max_width = max(int(2 * sw), 1) + (4 * part_width + 3 * spacing)
+    xmin = (npimage.shape[1] - max_width) // 2
+    num_players = _get_num_players(npimage[ymin:ymax, xmin:xmin+max_width], sw, sh)
 #     print("[WF OCR] found {} players".format(num_players))
     
     boxes = []
@@ -62,12 +65,21 @@ def _get_part_boxes(npimage):
     
     return boxes
 
-ref_checkmark_image = cv2.imread("checkmark.png", 0)
+ref_checkmark_image = cv2.imread(os.path.join("..", "res", "checkmark.png"), 0)
 #@benchmark
 def _get_num_players(parts_image, sw, sh):
     parts_image_gray = cv2.cvtColor(parts_image, cv2.COLOR_RGB2GRAY)
     checkmark_image = cv2.resize(ref_checkmark_image, (int(ref_checkmark_image.shape[1] * sw), int(ref_checkmark_image.shape[0] * sh)))
     results = cv2.matchTemplate(parts_image_gray, checkmark_image, cv2.TM_SQDIFF_NORMED)
+    
+#     plt.subplot(2, 2, 1)
+#     plt.imshow(parts_image_gray, cmap="gray")
+#     plt.subplot(2, 2, 2)
+#     plt.imshow(checkmark_image, cmap="gray")
+#     plt.subplot(2, 2, 3)
+#     plt.imshow(results, cmap="gray")
+#     plt.subplot(2, 2, 4)
+#     plt.imshow(results, cmap="gray")
     
     num_players = 1
     for _ in range(4):
@@ -78,18 +90,7 @@ def _get_num_players(parts_image, sw, sh):
         num_players += 1
         results[y-8:y+8, x-8:x+8] = 1
         
-#         plt.plot(x, y, marker="o", markersize=1, color="red")
-#     
-#     plt.subplot(2, 2, 1)
-#     plt.imshow(parts_image_gray, cmap="gray")
-#     plt.subplot(2, 2, 2)
-#     plt.imshow(checkmark_image, cmap="gray")
-#     plt.subplot(2, 2, 3)
-#     plt.imshow(results, cmap="gray")
-#     
-#     plt.subplot(2, 2, 4)
-#     plt.imshow(results, cmap="gray")
-#     
+#         plt.plot(x, y, marker="o", markersize=2, color="red")
 #     plt.show()
     
     return num_players
@@ -186,7 +187,7 @@ def get_item_names(screenshot):
         return []
 
 
-with open("item_data.json", "r", encoding="utf-8") as f:
+with open(os.path.join("..", "res", "item_data.json"), "r", encoding="utf-8") as f:
     item_database = json.load(f)
 
 #@benchmark 
