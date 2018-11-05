@@ -10,6 +10,9 @@ from decorators import benchmark
 import matplotlib.pyplot as plt
 import numpy as np
 import math
+import time
+import multiprocessing
+from concurrent.futures.process import ProcessPoolExecutor
 
 
 pytesseract.pytesseract.tesseract_cmd = r'E:\Tesseract\tesseract.exe'
@@ -34,6 +37,7 @@ ref_ymin, ref_ymax = 440, 654
 ref_part_width = 559
 ref_spacing = 17
 
+#@benchmark
 def _get_part_boxes(npimage):
     ar = npimage.shape[0] / float(npimage.shape[1])
     sw = (npimage.shape[1] * ar) / (ref_width * ref_ar)
@@ -59,6 +63,7 @@ def _get_part_boxes(npimage):
     return boxes
 
 ref_checkmark_image = cv2.imread("checkmark.png", 0)
+#@benchmark
 def _get_num_players(parts_image, sw, sh):
     parts_image_gray = cv2.cvtColor(parts_image, cv2.COLOR_RGB2GRAY)
     checkmark_image = cv2.resize(ref_checkmark_image, (int(ref_checkmark_image.shape[1] * sw), int(ref_checkmark_image.shape[0] * sh)))
@@ -92,7 +97,7 @@ def _get_num_players(parts_image, sw, sh):
 
 color_bronze = np.array([157, 116, 69])[None, None, :]
 color_silver = np.array([211, 211, 211])[None, None, :]
-color_gold = np.array([200, 184, 122])[None, None, :]
+color_gold = np.array([211, 187, 99])[None, None, :]
 
 #@benchmark
 def _get_name_start_height(part_image):
@@ -142,7 +147,8 @@ def get_item_names(screenshot):
     """
     try:
         screenshot = np.asarray(screenshot)
-        item_names = []
+        
+        tess_images = []
         
         for x1, y1, x2, y2 in _get_part_boxes(screenshot):
             part_image = screenshot[y1:y2, x1:x2]
@@ -156,8 +162,10 @@ def get_item_names(screenshot):
             parts_image_gray[~cutoff_ind] = 0 # np.minimum(parts_image_gray[~cutoff_ind].astype(np.int16) * 2, 255).astype(np.uint8)
             
             h, w = parts_image_gray.shape
-            tess_image = 255 * np.ones((h + 40, w + 40))
-            tess_image[20 : 20+h, 20:20+w] = parts_image_gray
+            # embed the image in a larger one with white background (tesseract needs a bit of space around the characters)
+            tess_image = 255 * np.ones((h + 20, w + 20))
+            tess_image[10:10+h, 10:10+w] = parts_image_gray
+            tess_images.append(tess_image)
             
 #             plt.subplot(3, 1, 1)
 #             plt.imshow(screenshot[y1:y2, x1:x2])
@@ -166,15 +174,13 @@ def get_item_names(screenshot):
 #             plt.subplot(3, 1, 3)
 #             plt.imshow(tess_image, cmap="gray")
 #             plt.show()
-            
-#             start = time.clock()
-            item_name = pytesseract.image_to_string(tess_image)
-#             duration = (time.clock() - start) * 1000.0
-#             print("benchmark for 'pytesseract.image_to_string': {0:.3f} ms".format(duration))
-            item_name = _adjust_to_database(item_name)
-            item_names.append(item_name)
         
-        return item_names
+        num_workers = min(len(tess_images), multiprocessing.cpu_count())
+        with ProcessPoolExecutor(max_workers=num_workers) as executor:
+            item_names = executor.map(pytesseract.image_to_string, tess_images)
+            item_names = executor.map(_adjust_to_database, item_names)
+   
+        return list(item_names)
     except Exception:
         print("[WF OCR] Error:\n", traceback.print_exc(file=sys.stdout))
         return []

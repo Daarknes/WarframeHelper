@@ -14,6 +14,8 @@ import win32gui
 
 import warframe_ocr
 import wfmarket
+import time
+from PyQt5.QtGui import QPalette, QColor
 
 
 hotkey = "alt+m"
@@ -64,12 +66,17 @@ class Window(QMainWindow):
         # labels for the 4 rewards
         self.labels = []
         labelFont = QFont("Monospace", 12)
+        self.labelBestPalette = QPalette(QColor(150, 255, 150))
+        self.labelDefaultPalette = QPalette(Qt.white)
+        
         for _ in range(4):
             label = QLabel(" - ")
             label.setFont(labelFont)
             label.setAlignment(Qt.AlignHCenter)
             label.setFrameShape(QFrame.Panel)
             label.setFrameShadow(QFrame.Sunken)
+            label.setAutoFillBackground(True)
+            label.setPalette(self.labelDefaultPalette)
             
             self.labels.append(label)
             labelLayout.addWidget(label)
@@ -96,7 +103,7 @@ class KeyboardThread(QThread):
                 print("could not find and focus the Warframe window. Stacktrace:\n", traceback.print_exc(file=sys.stdout))
                 return
             
-            image = ImageGrab.grab((x1, y1, x2, y2))
+            image = ImageGrab.grab((x1, y1, x2, y2))            
             if save_screenshot:
                 if not os.path.exists("../images/"):
                     os.makedirs("../images/")
@@ -109,23 +116,33 @@ class KeyboardThread(QThread):
                     label.setText("Error (Could not find item names)")
                 return
              
-            item_prices = {}
-            for item_name in set(item_names):
-                # exclude forma since it can't be sold
-                if item_name == "FORMA BLUEPRINT" or item_name == "ERROR":
-                    item_prices[item_name] = ["Not sellable"]
-                else:
-                    market_name = wfmarket.convert_to_market_name(item_name)
-                    item_prices[item_name] = wfmarket.get_item_price_list(market_name)
-    
+            item_prices = wfmarket.item_names_to_prices_map(item_names)
+            bestLabel = None
+            best_mean = 0
+
             offset = 1 if len(item_names) <= 2 else 0
             for i, label in enumerate(window.labels):
                 if 0 <= i-offset < len(item_names):
                     text = item_names[i - offset] + "\n\n"
-                    text += "\n".join(map(str, item_prices[item_names[i - offset]]))
+                    prices = item_prices[item_names[i - offset]]
+                    
+                    if prices is None:
+                        text += "ERROR"
+                    elif len(prices) == 0:
+                        text += "Not sellable"
+                    else:
+                        mean = sum(prices) / len(prices)
+                        if mean > best_mean:
+                            best_mean = mean
+                            bestLabel = label
+                        text += "\n".join(map(str, prices))
                 else:
                     text = " - "
+
                 label.setText(text)
+                label.setPalette(window.labelDefaultPalette)
+            
+            bestLabel.setPalette(window.labelBestPalette)
 
 if __name__ == "__main__":
     # to show exceptions from Qt after crash
