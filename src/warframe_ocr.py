@@ -10,12 +10,12 @@ import pytesseract
 # import matplotlib.pyplot as plt
 import numpy as np
 import math
-import multiprocessing
 from concurrent.futures.process import ProcessPoolExecutor
 import os
+import config
 
 
-pytesseract.pytesseract.tesseract_cmd = r'E:\Tesseract\tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = config.TESSERACT_PATH
 
 
 # threshhold for the checkbox pattern matching which evaluates the number of players
@@ -31,36 +31,44 @@ reference values
 """
 ref_width, ref_height = 2560, 1440
 ref_ar = ref_height / float(ref_width)
-# ref_ymin is the y-coordinate where the player names can begin if all 4 players selected the same item
-ref_ymin, ref_ymax = 440, 654
-#ref_ymin, ref_ymax = 244, 654
+# y-coordinate / height references
+# part area (currently not in use)
+ref_ymin_part, ref_ymax_part = 244, 654
+# possible player names / checkmark area (if all 4 players selected the same item)
+ref_ymin_players, ref_ymax_players = 440, 606
+# item name area
+ref_ymin_name, ref_ymax_name = 560, 650
+
+# x-coordinate / width references
+# width of a part
 ref_part_width = 559
+# spacing between two parts
 ref_spacing = 17
 
 #@benchmark
-def _get_part_boxes(npimage):
+def _get_name_boxes(npimage):
     ar = npimage.shape[0] / float(npimage.shape[1])
     sw = (npimage.shape[1] * ar) / (ref_width * ref_ar)
     # height seems to be independent of resolution
     sh = npimage.shape[0] / float(ref_height)
-    ymin, ymax = int(ref_ymin * sh), int(ref_ymax * sh)
 
     spacing = int(math.ceil(ref_spacing * sw))
     part_width = int(math.ceil(ref_part_width * sw))
+    ymin_players, ymax_players = int(ref_ymin_players * sh), int(ref_ymax_players * sh)
     
     # we can crop in x-coordinates because num_players <= 4
-    max_width = max(int(2 * sw), 1) + (4 * part_width + 3 * spacing)
+    max_width = 4 * part_width + 3 * spacing
     xmin = (npimage.shape[1] - max_width) // 2
-    num_players = _get_num_players(npimage[ymin:ymax, xmin:xmin+max_width], sw, sh)
+    num_players = _get_num_players(npimage[ymin_players:ymax_players, xmin:xmin+max_width], sw, sh)
 #     print("[WF OCR] found {} players".format(num_players))
     
-    boxes = []
+    ymin_name, ymax_name = int(ref_ymin_name * sh), int(ref_ymax_name * sh)
     x = max(int(2 * sw), 1) + (npimage.shape[1] - (num_players * part_width + (num_players - 1) * spacing)) // 2
     xmin_off, xmax_off = max(int(7 * sw), 2), max(int(8 * sw), 2)
-    ymin_off, ymax_off = max(int(3 * sh), 2), max(int(7 * sh), 2)
-
+    
+    boxes = []
     for _ in range(num_players):
-        boxes.append((x + xmin_off, ymin + ymin_off, x + part_width - xmax_off, ymax - ymax_off))
+        boxes.append((x + xmin_off, ymin_name, x + part_width - xmax_off, ymax_name))
         x += part_width + spacing
     
     return boxes
@@ -102,6 +110,9 @@ color_gold = np.array([211, 187, 99])[None, None, :]
 
 #@benchmark
 def _get_name_start_height(part_image):
+    """
+    calculates the actual start y-coordinate of an item name in a part image (necessary because item names can go over more than one line)
+    """
     image_bronze = np.sqrt(np.sum((part_image - color_bronze)**2, axis=2))
     image_bronze[image_bronze > COLOR_TRUNCATE_THRESHHOLD] = 255
     rowsum_bronze = np.sum(image_bronze, axis=1)
@@ -151,7 +162,7 @@ def get_item_names(screenshot):
         
         tess_images = []
         
-        for x1, y1, x2, y2 in _get_part_boxes(screenshot):
+        for x1, y1, x2, y2 in _get_name_boxes(screenshot):
             part_image = screenshot[y1:y2, x1:x2]
             ystart_ind = _get_name_start_height(part_image)
             
@@ -164,8 +175,8 @@ def get_item_names(screenshot):
             
             h, w = parts_image_gray.shape
             # embed the image in a larger one with white background (tesseract needs a bit of space around the characters)
-            tess_image = 255 * np.ones((h + 20, w + 20))
-            tess_image[10:10+h, 10:10+w] = parts_image_gray
+            tess_image = 255 * np.ones((h + 10, w + 10))
+            tess_image[5:5+h, 5:5+w] = parts_image_gray
             tess_images.append(tess_image)
             
 #             plt.subplot(3, 1, 1)
@@ -176,8 +187,8 @@ def get_item_names(screenshot):
 #             plt.imshow(tess_image, cmap="gray")
 #             plt.show()
         
-        num_workers = min(len(tess_images), multiprocessing.cpu_count())
-        with ProcessPoolExecutor(max_workers=num_workers) as executor:
+#         num_workers = min(len(tess_images), multiprocessing.cpu_count())
+        with ProcessPoolExecutor(max_workers=len(tess_images)) as executor:
             item_names = executor.map(pytesseract.image_to_string, tess_images)
             item_names = executor.map(_adjust_to_database, item_names)
    

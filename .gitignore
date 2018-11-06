@@ -2,7 +2,9 @@
 
 # Photoshop
 *.psd
+
 images/
+images_1080p/
 
 # eclipse / IDE
 .project
@@ -11,6 +13,9 @@ images/
 
 # temp folder
 tmp/
+
+# other
+*.cprof
 
 *.pdf
 *.aux

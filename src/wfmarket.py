@@ -1,5 +1,9 @@
 import requests
 import json
+from datetime import datetime
+import config
+import traceback
+import sys
 # from decorators import benchmark
 
 address = 'https://api.warframe.market/v1/items/{}/orders?include=item'
@@ -26,15 +30,25 @@ def _get_item_prices(market_item_name):
         print("[WFMarket] searching on '" + address.format(market_item_name) + "' for orders.")
         page = requests.get(address.format(market_item_name))
         data = json.loads(page.content.decode("utf-8"))
+        current_date = datetime.now()
     
         prices = []
         for order in data["payload"]["orders"]:
-            if order["visible"] and order["user"]["status"] == "ingame" and order["platform"] == "pc" and order["order_type"] == "sell":
-                prices.append(order["platinum"])
+            # first filter on platform, order type (we only want sell values) and visibility
+            if order["platform"] == "pc" and order["order_type"] == "sell" and order["visible"]:
+                if order["user"]["status"] == "ingame":
+                    prices.append(order["platinum"])
+                # otherwise check the time since last update of the order
+                else:
+                    last_updated = datetime.strptime(order["last_update"], "%Y-%m-%dT%H:%M:%S.%f+00:00")
+                    delta = current_date - last_updated
+                    order_age = delta.days * 24 + delta.seconds // 3600
+                    if order_age < config.MAX_ORDER_AGE:
+                        prices.append(order["platinum"])
                 
         return sorted(prices)
     except:
-        print("[WFMarket] Error while requesting data for '{}'".format(market_item_name))
+        print("[WFMarket] Error while requesting data for '{}'".format(market_item_name), traceback.print_exc(file=sys.stdout))
         return None
 
 def item_names_to_prices_map(item_names):

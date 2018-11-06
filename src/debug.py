@@ -7,6 +7,7 @@ import wfmarket
 import cProfile
 from concurrent.futures.process import ProcessPoolExecutor
 import pstats
+from datetime import datetime
 np.set_printoptions(linewidth=500)
 
 
@@ -45,21 +46,24 @@ def debug_full_single(image_path):
     print(item_prices)
 
 def debug_market(item_names):            
-#     item_prices = wfmarket.item_names_to_prices(item_names)
-    item_prices = {'EUPHONA PRIME BLUEPRINT': [2, 2, 2, 2, 2, 3, 3, 3, 5, 5, 5, 5, 5, 5], 'ZEPHYR PRIME CHASSIS BLUEPRINT': [7, 7, 7, 9, 9, 9, 10, 10, 10, 10, 10, 10, 10, 10, 10, 12, 15, 15, 20], 'KRONEN PRIME BLUEPRINT': [2, 2, 3, 3, 4, 4, 5, 7, 8, 9, 9, 10, 10]}
-    print(item_prices)
-    for name, prices in item_prices.items():
-        if prices is not None and prices != 0:
-            print(sum(prices) / len(prices))
+    item_prices = wfmarket.item_names_to_prices_map(item_names)
+#     item_prices = {'EUPHONA PRIME BLUEPRINT': [2, 2, 2, 2, 2, 3, 3, 3, 5, 5, 5, 5, 5, 5], 'ZEPHYR PRIME CHASSIS BLUEPRINT': [7, 7, 7, 9, 9, 9, 10, 10, 10, 10, 10, 10, 10, 10, 10, 12, 15, 15, 20], 'KRONEN PRIME BLUEPRINT': [2, 2, 3, 3, 4, 4, 5, 7, 8, 9, 9, 10, 10]}
+#     print(item_prices)
+#     for name, prices in item_prices.items():
+#         if prices is not None and prices != 0:
+#             print(sum(prices) / len(prices))
 
 
 if __name__ == "__main__":
-    debug_ocr_single(os.path.join("..", "images", "03-11-2018_12-46-22.png"))
+#     debug_ocr_single(os.path.join("..", "images", "03-11-2018_12-46-22.png"))
 #     debug_ocr_single(os.path.join("..", "images_1080p", "03-11-2018_15-35-35.png"))
-
+    
+#     date = datetime.strptime('2018-04-17T18:05:12.000+00:00', "%Y-%m-%dT%H:%M:%S.%f+00:00")
+#     print(date)
+    
 #     prof = cProfile.Profile()
 #     prof.enable()
-#     debug_market(['EUPHONA PRIME BLUEPRINT', 'KRONEN PRIME BLUEPRINT', 'ZEPHYR PRIME CHASSIS BLUEPRINT', 'EUPHONA PRIME BLUEPRINT'])
+    debug_market(['EUPHONA PRIME BLUEPRINT', 'KRONEN PRIME BLUEPRINT', 'ZEPHYR PRIME CHASSIS BLUEPRINT', 'EUPHONA PRIME BLUEPRINT'])
 #     prof.disable()
 #     
 #     prof.dump_stats("perftest.cprof")
