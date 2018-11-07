@@ -17,7 +17,6 @@ import config
 
 pytesseract.pytesseract.tesseract_cmd = config.config["TESSERACT_PATH"]
 
-
 # threshhold for the checkbox pattern matching which evaluates the number of players
 CHECKMARK_MATCH_THRESHHOLD = 0.15
 # truncates a part image when the difference between part image and font color is greater than this value
@@ -44,6 +43,17 @@ ref_ymin_name, ref_ymax_name = 560, 650
 ref_part_width = 559
 # spacing between two parts
 ref_spacing = 17
+
+# Process pool for tesseract paralellization
+_executor = None
+
+def init():
+    global _executor
+    _executor = ProcessPoolExecutor(max_workers=4)
+    _executor.map(str, range(4))
+
+def cleanup():
+    _executor.shutdown()
 
 #@benchmark
 def _get_name_boxes(npimage):
@@ -151,7 +161,6 @@ def _get_name_start_height(part_image):
 def _filter_peaks(image, exp=10):
     return ((1 - (1 - image / 255.0)**exp) * 255).astype(np.uint8)
 
-#@benchmark
 def get_item_names(screenshot):
     """
     converts a screenshot to valid warframe item names.
@@ -175,8 +184,8 @@ def get_item_names(screenshot):
             
             h, w = parts_image_gray.shape
             # embed the image in a larger one with white background (tesseract needs a bit of space around the characters)
-            tess_image = 255 * np.ones((h + 10, w + 10))
-            tess_image[5:5+h, 5:5+w] = parts_image_gray
+            tess_image = 255 * np.ones((h + 8, w + 8))
+            tess_image[4:4+h, 4:4+w] = parts_image_gray
             tess_images.append(tess_image)
             
 #             plt.subplot(3, 1, 1)
@@ -187,10 +196,8 @@ def get_item_names(screenshot):
 #             plt.imshow(tess_image, cmap="gray")
 #             plt.show()
         
-#         num_workers = min(len(tess_images), multiprocessing.cpu_count())
-        with ProcessPoolExecutor(max_workers=len(tess_images)) as executor:
-            item_names = executor.map(pytesseract.image_to_string, tess_images)
-            item_names = executor.map(_adjust_to_database, item_names)
+        item_names = _executor.map(pytesseract.image_to_string, tess_images)
+        item_names = _executor.map(_adjust_to_database, item_names)
    
         return list(item_names)
     except Exception:
@@ -198,7 +205,7 @@ def get_item_names(screenshot):
         return []
 
 
-with open(os.path.join("..", "res", "item_data.json"), "r", encoding="utf-8") as f:
+with open(os.path.join("..", "res", "ocr_item_data.json"), "r", encoding="utf-8") as f:
     item_database = json.load(f)
 
 #@benchmark 
@@ -216,6 +223,7 @@ def _adjust_to_database(name):
             break
     
     if lmin > len(name):
+        print("[WF OCR] '{}' is too far away from database (best match is '{}')".format(name, best))
         return "ERROR"
     else:
         return best

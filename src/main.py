@@ -101,7 +101,7 @@ class KeyboardThread(QThread):
             keyboard.wait(config.config["HOTKEY"])
             
             try:
-                hwnd = win32gui.FindWindow(None, r'Fotos')
+                hwnd = win32gui.FindWindow(None, r'Warframe')
                 win32gui.SetForegroundWindow(hwnd)
                 if win32gui.GetForegroundWindow() != hwnd:
                     raise Exception("Could not set the Warframe window as foreground")
@@ -149,7 +149,7 @@ class KeyboardThread(QThread):
                             best_quantile = quantile
                             bestLabel = i
 
-                        num_lines = min(len(prices), 30)
+                        num_lines = min(len(prices), 45)
                         text += "\n".join(map(str, prices[:num_lines]))
                 else:
                     text = " - "
@@ -171,7 +171,11 @@ if __name__ == "__main__":
     keyboardThread = KeyboardThread(window)
     keyboardThread.textSignal.connect(window.setLabelText)
     keyboardThread.paletteSignal.connect(window.setLabelPalette)
+    warframe_ocr.init()
     
     window.show()
     keyboardThread.start()
-    sys.exit(app.exec_())
+    
+    exitCode = app.exec_()
+    warframe_ocr.cleanup()
+    sys.exit(exitCode)

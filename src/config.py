@@ -112,4 +112,3 @@ section_gui.addEntry("save_screenshot", True, "Saves the screenshot to the 'imag
 
 config.build()
 config.loadAndUpdate("config.cfg")
-print(config._entries)

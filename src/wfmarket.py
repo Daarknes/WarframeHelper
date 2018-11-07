@@ -6,7 +6,7 @@ import traceback
 import sys
 # from decorators import benchmark
 
-address = 'https://api.warframe.market/v1/items/{}/orders?include=item'
+address = "https://api.warframe.market/v1/items/{}/orders?include=item"
 
 warframe_parts = ["chassis", "systems", "neuroptics"]
 special_map = {
@@ -25,7 +25,7 @@ def _convert_to_market_name(raw_item_name):
     return market_name
 
 #@benchmark
-def _get_item_prices(market_item_name):
+def get_item_prices(market_item_name):
     try:
         print("[WFMarket] searching on '" + address.format(market_item_name) + "' for orders.")
         page = requests.get(address.format(market_item_name))
@@ -60,11 +60,7 @@ def item_names_to_prices_map(item_names):
             name_to_prices[item_name] = []
         else:
             market_name = _convert_to_market_name(item_name)
-            name_to_prices[item_name] = _get_item_prices(market_name)
+            name_to_prices[item_name] = get_item_prices(market_name)
 
     return name_to_prices
-
-
-if __name__ == "__main__":
-    _get_item_prices("rhino_prime_chassis")
     

@@ -55,20 +55,22 @@ def debug_market(item_names):
 
 
 if __name__ == "__main__":
-#     debug_ocr_single(os.path.join("..", "images", "03-11-2018_12-46-22.png"))
-#     debug_ocr_single(os.path.join("..", "images_1080p", "03-11-2018_15-35-35.png"))
+    prof = cProfile.Profile()
+    prof.enable()
+    debug_ocr_single(os.path.join("..", "images", "03-11-2018_12-46-22.png"))
+    debug_ocr_single(os.path.join("..", "images_1080p", "03-11-2018_15-35-35.png"))
+    warframe_ocr.cleanup()
+    prof.disable()
     
 #     date = datetime.strptime('2018-04-17T18:05:12.000+00:00', "%Y-%m-%dT%H:%M:%S.%f+00:00")
 #     print(date)
     
 #     prof = cProfile.Profile()
 #     prof.enable()
-    debug_market(['EUPHONA PRIME BLUEPRINT', 'KRONEN PRIME BLUEPRINT', 'ZEPHYR PRIME CHASSIS BLUEPRINT', 'EUPHONA PRIME BLUEPRINT'])
+#     debug_market(['EUPHONA PRIME BLUEPRINT', 'KRONEN PRIME BLUEPRINT', 'ZEPHYR PRIME CHASSIS BLUEPRINT', 'EUPHONA PRIME BLUEPRINT'])
 #     prof.disable()
 #     
-#     prof.dump_stats("perftest.cprof")
-#     stats = pstats.Stats("perftest.cprof")
-#     stats.sort_stats("time").print_stats(40)
-        
-#     prof.print_stats(sort="time")
+    prof.dump_stats("perftest.cprof")
+    stats = pstats.Stats("perftest.cprof")
+    stats.sort_stats("time").print_stats(40)
     
