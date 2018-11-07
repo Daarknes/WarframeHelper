@@ -43,7 +43,7 @@ def _get_item_prices(market_item_name):
                     last_updated = datetime.strptime(order["last_update"], "%Y-%m-%dT%H:%M:%S.%f+00:00")
                     delta = current_date - last_updated
                     order_age = delta.days * 24 + delta.seconds // 3600
-                    if order_age < config.MAX_ORDER_AGE:
+                    if order_age < config.config["MAX_ORDER_AGE"]:
                         prices.append(order["platinum"])
                 
         return sorted(prices)

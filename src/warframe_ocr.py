@@ -15,7 +15,7 @@ import os
 import config
 
 
-pytesseract.pytesseract.tesseract_cmd = config.TESSERACT_PATH
+pytesseract.pytesseract.tesseract_cmd = config.config["TESSERACT_PATH"]
 
 
 # threshhold for the checkbox pattern matching which evaluates the number of players

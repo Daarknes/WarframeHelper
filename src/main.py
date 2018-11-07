@@ -54,7 +54,7 @@ class Window(QMainWindow):
         mainLayout.setSpacing(20)
         self.setCentralWidget(dummy)
         
-        lDesc = QLabel("Press '{}' to search for prices (you need to be in the relic reward screen)".format(config.HOTKEY))
+        lDesc = QLabel("Press '{}' to search for prices (you need to be in the relic reward screen)".format(config.config["HOTKEY"]))
         lDesc.setFont(QFont("Monospace", 14))
         lDesc.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         lDesc.setAlignment(Qt.AlignHCenter)
@@ -98,7 +98,7 @@ class KeyboardThread(QThread):
     
     def run(self):
         while True:
-            keyboard.wait(config.HOTKEY)
+            keyboard.wait(config.config["HOTKEY"])
             
             try:
                 hwnd = win32gui.FindWindow(None, r'Fotos')
@@ -117,7 +117,7 @@ class KeyboardThread(QThread):
                 self.paletteSignal.emit(i, False)
             
             image = ImageGrab.grab((x1, y1, x2, y2))   
-            if config.save_screenshot:
+            if config.config["save_screenshot"]:
                 if not os.path.exists("../images/"):
                     os.makedirs("../images/")
                 image.save("../images/{}.png".format(datetime.datetime.now().strftime("%d-%m-%Y_%H-%M-%S")))

@@ -15,6 +15,7 @@ images_1080p/
 tmp/
 
 # other
+*.cfg
 *.cprof
 
 *.pdf
