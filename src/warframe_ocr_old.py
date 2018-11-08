@@ -1,194 +1,217 @@
 from builtins import Exception
+import json
+import sys
+import traceback
 
 import cv2
 import pytesseract
 
-import numpy as np
-import json
-from decorators import benchmark
-import time
-import traceback
-import sys
-
+# from decorators import benchmark
 import matplotlib.pyplot as plt
+import numpy as np
+import math
+from concurrent.futures.process import ProcessPoolExecutor
+import os
+import config
 
 
-pytesseract.pytesseract.tesseract_cmd = r'E:\Tesseract\tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = config.config["TESSERACT_PATH"]
 
-
-
-# threshhold for the horizontal line detection
-THRESHHOLD_HOR = 0.35
-
-# for vertical line recognition we only take the bottom most X-percent of the image
-VERT_PERC = 0.23
-# threshhold for the vertical line detection
-THRESHHOLD_VER = 0.55
-
+# threshhold for the checkbox pattern matching which evaluates the number of players
+CHECKMARK_MATCH_THRESHHOLD = 0.15
+# truncates a part image when the difference between part image and font color is greater than this value
 COLOR_TRUNCATE_THRESHHOLD = 10
-COLOR_SUM_THRESHHOLD_MULTI = 0.75
+# how much larger can the difference between two font colors be to be chosen as the upper most line
+COLOR_SUM_THRESHHOLD_MULTI = 1.25
 
 
+"""
+reference values
+"""
+ref_width, ref_height = 2560, 1440
+ref_ar = ref_height / float(ref_width)
+# y-coordinate / height references
+# part area (currently not in use)
+ref_ymin_part, ref_ymax_part = 244, 654
+# possible player names / checkmark area (if all 4 players selected the same item)
+ref_ymin_players, ref_ymax_players = 418, 606
+# item name area
+ref_ymin_name, ref_ymax_name = 574, 646
 
-def filter_peaks(image, exp=10):
-    return ((1 - (1 - image / 255.0)**exp) * 255).astype(np.uint8)
+# x-coordinate / width references
+# width of a part
+ref_part_width = 559
+# spacing between two parts
+ref_spacing = 17
 
+# Process pool for tesseract paralellization
+_executor = None
 
-@benchmark
-def get_part_rectangles(screenshot_grayscale):
-    image = filter_peaks(screenshot_grayscale, exp=10)
+def init():
+    global _executor
+    _executor = ProcessPoolExecutor(max_workers=4)
+    _executor.map(str, range(4))
 
-    plt.subplot(2, 1, 1)
-    plt.imshow(image, cmap="gray")
-    plt.subplot(2, 1, 2)
-    plt.imshow(filter_peaks(screenshot_grayscale, exp=4), cmap="gray")
-    plt.show()
+def cleanup():
+    _executor.shutdown()
 
-    # search for the two horizontal 'lines' encapsulating the items
-    sobely = cv2.Sobel(image, cv2.CV_64F, 0, 1, ksize=3)
-    rowsum = np.abs(sobely.sum(axis=1))
-    max_ind_y = np.where(rowsum > THRESHHOLD_HOR * rowsum.max())[0]
-    ymin_ind, ymax_ind = max_ind_y[0] + 10, max_ind_y[-1] - 10
+#@benchmark
+def _get_name_boxes(npimage):
+    ar = npimage.shape[0] / float(npimage.shape[1])
+    sw = (npimage.shape[1] * ar) / (ref_width * ref_ar)
+    # height seems to be independent of resolution
+    sh = npimage.shape[0] / float(ref_height)
+
+    spacing = int(math.ceil(ref_spacing * sw))
+    part_width = int(math.ceil(ref_part_width * sw))
+    ymin_players, ymax_players = int(ref_ymin_players * sh), int(ref_ymax_players * sh)
     
-    plt.subplot(2, 2, 1)
-    plt.imshow(sobely, cmap="gray")
-    plt.subplot(2, 2, 2)
-    plt.plot(rowsum, range(0, -len(rowsum), -1))
-    plt.axvline(THRESHHOLD_HOR * rowsum.max())
-    plt.subplot(2, 2, 3)
-    plt.imshow(screenshot_grayscale[ymin_ind:ymax_ind, :], cmap="gray")
-    plt.tight_layout()
-    plt.show()
+    # we can crop in x-coordinates because num_players <= 4
+    max_width = 4 * part_width + 3 * spacing
+    xmin = (npimage.shape[1] - max_width) // 2
+    num_players = _get_num_players(npimage[ymin_players:ymax_players, xmin:xmin+max_width], sw, sh)
+#     print("[WF OCR] found {} players".format(num_players))
     
-#    data = image[ymin_ind:ymax_ind, :] / 255.0
-#    sobelx = 0.5 * (np.abs(cv2.Sobel(data, cv2.CV_64F, 1, 0, ksize=3)) + np.abs(cv2.Sobel(-data, cv2.CV_64F, 1, 0, ksize=3)))
-    sobelx = cv2.Sobel(image[ymin_ind:ymax_ind, :], cv2.CV_64F, 1, 0, ksize=3)
-    # take the bottom most X-percent of the sobeled image
-    start = int(sobelx.shape[0] * (1 - VERT_PERC))
-    colsum = np.abs(sobelx[start:].sum(axis=0))
-    # use symmetry to make the results slightly better
-    colsum += colsum[::-1]
-    max_ind_x = np.where(colsum > THRESHHOLD_VER * colsum.max())[0]
+    ymin_name, ymax_name = int(ref_ymin_name * sh), int(ref_ymax_name * sh)
+    x = max(int(2 * sw), 1) + (npimage.shape[1] - (num_players * part_width + (num_players - 1) * spacing)) // 2
+    xmin_off, xmax_off = max(int(7 * sw), 2), max(int(8 * sw), 2)
     
-    plt.subplot(2, 1, 1)
-    plt.imshow(sobelx[start:], cmap="gray")
-    plt.subplot(2, 1, 2)
-    plt.plot(colsum)
-    plt.axhline(THRESHHOLD_VER * colsum.max())
-    plt.show()
+    boxes = []
+    for _ in range(num_players):
+        boxes.append((x + xmin_off, ymin_name, x + part_width - xmax_off, ymax_name))
+        x += part_width + spacing
     
-    def next_valid_index():
-        last_index = -100
-        for i in max_ind_x:
-            # distance between two maxima (lines) should be at least 8 pixels
-            if i - last_index > 8:
-                last_index = i
-                yield i
-    
-    part_rects = []
-    index_it = next_valid_index()
+    return boxes
 
-    try:
-        while True:
-            xmin_ind = next(index_it) + 4
-            xmax_ind = next(index_it) - 4
-            part_rects.append((xmin_ind, ymin_ind, xmax_ind, ymax_ind))
-    except StopIteration:
-        pass
-     
-#     for i, rect in enumerate(name_rects):
-#         plt.subplot(2, len(name_rects), i+1)
-#         plt.imshow(screenshot[rect[1]:rect[3], rect[0]:rect[2]], cmap="gray")
-#         plt.subplot(2, len(name_rects), len(name_rects) + i+1)
-#         plt.imshow(image[rect[1]:rect[3], rect[0]:rect[2]], cmap="gray")
+ref_checkmark_image = cv2.imread(os.path.join("..", "res", "checkmark.png"), 0)
+#@benchmark
+def _get_num_players(parts_image, sw, sh):
+    players_image_gray = cv2.cvtColor(parts_image, cv2.COLOR_RGB2GRAY)
+    checkmark_image = cv2.resize(ref_checkmark_image, (int(ref_checkmark_image.shape[1] * sw), int(ref_checkmark_image.shape[0] * sh)))
+    results = cv2.matchTemplate(players_image_gray, checkmark_image, cv2.TM_SQDIFF_NORMED)
+    
+#     plt.subplot(2, 2, 1)
+#     plt.imshow(players_image_gray, cmap="gray")
+#     plt.subplot(2, 2, 2)
+#     plt.imshow(checkmark_image, cmap="gray")
+#     plt.subplot(2, 2, 3)
+#     plt.imshow(results, cmap="gray")
+#     plt.subplot(2, 2, 4)
+#     plt.imshow(results, cmap="gray")
+    
+    num_players = 1
+    for _ in range(4):
+        y, x = np.unravel_index(np.argmin(results), results.shape)
+        # when the next match is not good enough there probably aren't more players
+        if (results[y, x] > CHECKMARK_MATCH_THRESHHOLD):
+            break
+        num_players += 1
+        results[y-8:y+8, x-8:x+8] = 1
+        
+#         plt.plot(x, y, marker="o", markersize=2, color="red")
 #     plt.show()
-
-    return part_rects
-
+    
+    return num_players
 
 
 color_bronze = np.array([157, 116, 69])[None, None, :]
 color_silver = np.array([211, 211, 211])[None, None, :]
-color_gold = np.array([200, 184, 122])[None, None, :]
+color_gold = np.array([211, 187, 99])[None, None, :]
 
-@benchmark
-def get_name_start_height(part_image):
-    ystart_offset = int((1 - VERT_PERC) * part_image.shape[0])
-    part_image = part_image[ystart_offset:]
+#@benchmark
+def _get_name_start_height(part_image):
+    """
+    calculates the actual start y-coordinate of an item name in a part image (necessary because item names can go over more than one line)
+    """
     image_bronze = np.sqrt(np.sum((part_image - color_bronze)**2, axis=2))
-    image_bronze[image_bronze > COLOR_TRUNCATE_THRESHHOLD] = 0
+    image_bronze[image_bronze > COLOR_TRUNCATE_THRESHHOLD] = 255
     rowsum_bronze = np.sum(image_bronze, axis=1)
     
     image_silver = np.sqrt(np.sum((part_image - color_silver)**2, axis=2))
-    image_silver[image_silver > COLOR_TRUNCATE_THRESHHOLD] = 0
+    image_silver[image_silver > COLOR_TRUNCATE_THRESHHOLD] = 255
     rowsum_silver = np.sum(image_silver, axis=1)
     
     image_gold = np.sqrt(np.sum((part_image - color_gold)**2, axis=2))
-    image_gold[image_gold > COLOR_TRUNCATE_THRESHHOLD] = 0
+    image_gold[image_gold > COLOR_TRUNCATE_THRESHHOLD] = 255
     rowsum_gold = np.sum(image_gold, axis=1)
     
     rowsums = (rowsum_bronze, rowsum_silver, rowsum_gold)
-    rowsum = rowsums[np.argmax([np.max(rowsum) for rowsum in rowsums])]
+    chosen_ind = np.argmin([np.min(rowsum) for rowsum in rowsums])
+    rowsum = rowsums[chosen_ind]
     
-#     plt.subplot(1, 4, 1)
+#     print("[WF OCR] Detected a", ("bronze", "silver", "gold")[chosen_ind], " item name")
+    
+#     plt.subplot(2, 3, 1)
 #     plt.imshow(part_image)
-#     plt.subplot(1, 4, 2)
+#     plt.subplot(2, 3, 2)
+#     plt.plot(rowsum_bronze)
+#     plt.plot(rowsum_silver)
+#     plt.plot(rowsum_gold)
+#      
+#     plt.subplot(2, 3, 4)
 #     plt.imshow(image_bronze, cmap="gray")
-#     plt.subplot(1, 4, 3)
+#     plt.subplot(2, 3, 5)
 #     plt.imshow(image_silver, cmap="gray")
-#     plt.subplot(1, 4, 4)
+#     plt.subplot(2, 3, 6)
 #     plt.imshow(image_gold, cmap="gray")
 #     plt.show()
     
-    return ystart_offset + np.where(rowsum > rowsum.max() * COLOR_SUM_THRESHHOLD_MULTI)[0][0] - 8
+    return np.where(rowsum < rowsum.min() * COLOR_SUM_THRESHHOLD_MULTI)[0][0] - 6
 
-@benchmark
+def _filter_peaks(image, exp=10):
+    return ((1 - (1 - image / 255.0)**exp) * 255).astype(np.uint8)
+
 def get_item_names(screenshot):
     """
-    converts a screenschot to valid warframe item names.
-    @param screenshot: the screenshot as a PIL-Image
+    converts a screenshot to valid warframe item names.
+    @param screenshot: the screenshot as a PIL-Image or numpy-array
     """
     try:
-        x, y = screenshot.size[0] * 0.03, screenshot.size[1] * 0.08
-        screenshot = np.asarray(screenshot.crop((x, y, screenshot.size[0] - x, screenshot.size[1] // 2)))
-        screenshot_grayscale = cv2.cvtColor(screenshot, cv2.COLOR_RGB2GRAY)
+        screenshot = np.asarray(screenshot)
         
-        part_rects = get_part_rectangles(screenshot_grayscale)
-        item_names = []
+        tess_images = []
         
-        for xmin_ind, ymin_ind, xmax_ind, ymax_ind in part_rects:
-            part_image = screenshot[ymin_ind:ymax_ind, xmin_ind:xmax_ind]
-            ystart_ind = get_name_start_height(part_image)
+        for x1, y1, x2, y2 in _get_name_boxes(screenshot):
+            part_image = screenshot[y1:y2, x1:x2]
+            ystart_ind = _get_name_start_height(part_image)
             
-            image = screenshot_grayscale[ymin_ind+ystart_ind:ymax_ind, xmin_ind:xmax_ind]
-            image = filter_peaks(image, exp=0.2)
+            parts_image_gray = cv2.cvtColor(part_image[ystart_ind:, :], cv2.COLOR_RGB2GRAY)
+            parts_image_gray = _filter_peaks(parts_image_gray, exp=0.2)
             
-    #         plt.subplot(2, 1, 1)
-    #         plt.imshow(part_image[ystart_ind:, :], cmap="gray")
-    #         plt.subplot(2, 1, 2)
-    #         plt.imshow(image, cmap="gray")
-    #         plt.show()
+            # cutoff (also invert the colors)
+            cutoff_ind = parts_image_gray < 9
+            parts_image_gray[cutoff_ind] = 255
+            parts_image_gray[~cutoff_ind] = 0
             
-            start = time.clock()
-            item_name = pytesseract.image_to_string(image)
-            duration = (time.clock() - start) * 1000.0
-            print("benchmark for 'pytesseract.image_to_string': {0:.3f} ms".format(duration))
+            h, w = parts_image_gray.shape
+            # embed the image in a larger one with white background (tesseract needs a bit of space around the characters)
+            tess_image = 255 * np.ones((h + 8, w + 8))
+            tess_image[4:4+h, 4:4+w] = parts_image_gray
+            tess_images.append(tess_image)
             
-            item_name = adjust_to_database(item_name)
-            item_names.append(item_name)
+#             plt.subplot(3, 1, 1)
+#             plt.imshow(screenshot[y1:y2, x1:x2])
+#             plt.subplot(3, 1, 2)
+#             plt.imshow(part_image[ystart_ind:, :], cmap="gray")
+#             plt.subplot(3, 1, 3)
+#             plt.imshow(tess_image, cmap="gray")
+#             plt.show()
         
-        return item_names
+        item_names = _executor.map(pytesseract.image_to_string, tess_images)
+        item_names = _executor.map(_adjust_to_database, item_names)
+   
+        return list(item_names)
     except Exception:
         print("[WF OCR] Error:\n", traceback.print_exc(file=sys.stdout))
         return []
 
 
-with open("item_data.json", "r", encoding="utf-8") as f:
+with open(os.path.join("..", "res", "ocr_item_data.json"), "r", encoding="utf-8") as f:
     item_database = json.load(f)
 
-@benchmark 
-def adjust_to_database(name):
-    lmin = len(name) * 2 + 1
+#@benchmark 
+def _adjust_to_database(name):
+    lmin = 1e12
     best = name
 
     for db_name in item_database:
@@ -200,7 +223,11 @@ def adjust_to_database(name):
         if ldist == 0:
             break
     
-    return best
+    if lmin > len(name):
+        print("[WF OCR] '{}' is too far away from database (best match is '{}')".format(name, best))
+        return "ERROR"
+    else:
+        return best
     
 
 def levenshtein_distance(s, t, costs=(1, 1, 1)):
@@ -239,15 +266,5 @@ def levenshtein_distance(s, t, costs=(1, 1, 1)):
                                  dist[row][col-1] + inserts,
                                  dist[row-1][col-1] + cost) # substitution    
  
-    return dist[row][col]
-
-
-if __name__ == '__main__':    
-    from PIL import Image
-
-    for i in ["0.png", "1.png", "volt.jpg", "silver.jpg"]:
-        screenshot = np.asarray(Image.open("images/" + i))
-        screenshot = screenshot[:screenshot.shape[0] // 2, :]
- 
-        names = get_item_names(screenshot)
-        print(names)
+    return dist[rows-1][cols-1]
+    

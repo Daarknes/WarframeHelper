@@ -105,6 +105,7 @@ section_ocr.addEntry("TESSERACT_PATH", r"C:\Program Files\Tesseract\tesseract.ex
 
 section_market = config.addSection("Warframe Market")
 section_market.addEntry("MAX_ORDER_AGE", 24, "only include orders of players that are either in-game, or that have been updated in the last X hours")
+section_market.addEntry("MAX_UPDATE_AGE", 24, "The local market data (the prices) gets updated after this amount of hours")
 
 section_gui = config.addSection("GUI")
 section_gui.addEntry("HOTKEY", "alt+m", "The hotkey to press")

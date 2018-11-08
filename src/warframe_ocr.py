@@ -34,9 +34,9 @@ ref_ar = ref_height / float(ref_width)
 # part area (currently not in use)
 ref_ymin_part, ref_ymax_part = 244, 654
 # possible player names / checkmark area (if all 4 players selected the same item)
-ref_ymin_players, ref_ymax_players = 440, 606
+ref_ymin_players, ref_ymax_players = 418, 606
 # item name area
-ref_ymin_name, ref_ymax_name = 560, 650
+ref_ymin_name, ref_ymax_name = 574, 646
 
 # x-coordinate / width references
 # width of a part
@@ -86,12 +86,12 @@ def _get_name_boxes(npimage):
 ref_checkmark_image = cv2.imread(os.path.join("..", "res", "checkmark.png"), 0)
 #@benchmark
 def _get_num_players(parts_image, sw, sh):
-    parts_image_gray = cv2.cvtColor(parts_image, cv2.COLOR_RGB2GRAY)
+    players_image_gray = cv2.cvtColor(parts_image, cv2.COLOR_RGB2GRAY)
     checkmark_image = cv2.resize(ref_checkmark_image, (int(ref_checkmark_image.shape[1] * sw), int(ref_checkmark_image.shape[0] * sh)))
-    results = cv2.matchTemplate(parts_image_gray, checkmark_image, cv2.TM_SQDIFF_NORMED)
+    results = cv2.matchTemplate(players_image_gray, checkmark_image, cv2.TM_SQDIFF_NORMED)
     
 #     plt.subplot(2, 2, 1)
-#     plt.imshow(parts_image_gray, cmap="gray")
+#     plt.imshow(players_image_gray, cmap="gray")
 #     plt.subplot(2, 2, 2)
 #     plt.imshow(checkmark_image, cmap="gray")
 #     plt.subplot(2, 2, 3)
@@ -113,50 +113,74 @@ def _get_num_players(parts_image, sw, sh):
     
     return num_players
 
+def _filter_gradient(part_image, color_dark, color_bright, dark_tol=5, bright_tol=4):
+    darker_ind = np.any(part_image < color_dark - dark_tol, axis=2)
+    brighter_ind = np.any(part_image > color_bright + bright_tol, axis=2)
 
-color_bronze = np.array([157, 116, 69])[None, None, :]
-color_silver = np.array([211, 211, 211])[None, None, :]
-color_gold = np.array([211, 187, 99])[None, None, :]
+    image = np.ones(part_image.shape[:2])
+    image[darker_ind | brighter_ind] = 0
+    
+    return image
 
-#@benchmark
-def _get_name_start_height(part_image):
-    """
-    calculates the actual start y-coordinate of an item name in a part image (necessary because item names can go over more than one line)
-    """
-    image_bronze = np.sqrt(np.sum((part_image - color_bronze)**2, axis=2))
-    image_bronze[image_bronze > COLOR_TRUNCATE_THRESHHOLD] = 255
+bronze_dark = np.array([123, 77, 23])
+bronze_bright = np.array([157, 116, 69])
+silver_dark = np.array([138, 138, 138])
+silver_bright = np.array([211, 211, 211])
+gold_dark = np.array([136, 123, 63])
+gold_bright = np.array([211, 187, 99])
+    
+def _get_text_image(part_image):
+    image_bronze = _filter_gradient(part_image, bronze_dark, bronze_bright)
     rowsum_bronze = np.sum(image_bronze, axis=1)
     
-    image_silver = np.sqrt(np.sum((part_image - color_silver)**2, axis=2))
-    image_silver[image_silver > COLOR_TRUNCATE_THRESHHOLD] = 255
+    image_silver = _filter_gradient(part_image, silver_dark, silver_bright, dark_tol=4, bright_tol=0)
     rowsum_silver = np.sum(image_silver, axis=1)
     
-    image_gold = np.sqrt(np.sum((part_image - color_gold)**2, axis=2))
-    image_gold[image_gold > COLOR_TRUNCATE_THRESHHOLD] = 255
+    image_gold = _filter_gradient(part_image, gold_dark, gold_bright)
     rowsum_gold = np.sum(image_gold, axis=1)
     
+    # pick the best of the three
     rowsums = (rowsum_bronze, rowsum_silver, rowsum_gold)
-    chosen_ind = np.argmin([np.min(rowsum) for rowsum in rowsums])
+    chosen_ind = np.argmax([np.max(rowsum) for rowsum in rowsums])
     rowsum = rowsums[chosen_ind]
+    image = (image_bronze, image_silver, image_gold)[chosen_ind]
     
-#     print("[WF OCR] Detected a", ("bronze", "silver", "gold")[chosen_ind], " item name")
+    s_cutoff = 0.2
+    text_y_ind = np.where(rowsum > rowsum.max() * s_cutoff)[0]
+    # crop in y-direction
+    image = image[text_y_ind[0]:text_y_ind[-1], :]
+    colsum = np.sum(image, axis=0)
+    text_x_ind = np.where(colsum > 1)[0]
+    image = image[:, text_x_ind[0]:text_x_ind[-1]]
     
-#     plt.subplot(2, 3, 1)
+    # invert colors (so that text is black and the rest white)
+    image = 255 * (1 - image)
+    
+#     plt.subplot(3, 3, 1)
 #     plt.imshow(part_image)
-#     plt.subplot(2, 3, 2)
-#     plt.plot(rowsum_bronze)
-#     plt.plot(rowsum_silver)
-#     plt.plot(rowsum_gold)
-#     
-#     plt.subplot(2, 3, 4)
+#     plt.subplot(3, 3, 2)
+#     plt.title("rowsums")
+#     plt.plot(rowsum_bronze, label="bronze")
+#     plt.plot(rowsum_silver, label="silver")
+#     plt.plot(rowsum_gold, label="gold")
+#     plt.legend()
+#     plt.subplot(3, 3, 3)
+#     plt.title("colsum (of the chosen image)")
+#     plt.plot(colsum)
+#      
+#     plt.subplot(3, 3, 4)
 #     plt.imshow(image_bronze, cmap="gray")
-#     plt.subplot(2, 3, 5)
+#     plt.subplot(3, 3, 5)
 #     plt.imshow(image_silver, cmap="gray")
-#     plt.subplot(2, 3, 6)
+#     plt.subplot(3, 3, 6)
 #     plt.imshow(image_gold, cmap="gray")
+#     
+#     plt.subplot(3, 3, 8)
+#     plt.imshow(image, cmap="gray")
+#     
 #     plt.show()
     
-    return np.where(rowsum < rowsum.min() * COLOR_SUM_THRESHHOLD_MULTI)[0][0] - 6
+    return image
 
 def _filter_peaks(image, exp=10):
     return ((1 - (1 - image / 255.0)**exp) * 255).astype(np.uint8)
@@ -173,26 +197,18 @@ def get_item_names(screenshot):
         
         for x1, y1, x2, y2 in _get_name_boxes(screenshot):
             part_image = screenshot[y1:y2, x1:x2]
-            ystart_ind = _get_name_start_height(part_image)
             
-            parts_image_gray = cv2.cvtColor(part_image[ystart_ind:, :], cv2.COLOR_RGB2GRAY)
-            parts_image_gray = _filter_peaks(parts_image_gray, exp=0.2)
-            # cutoff (also invert the colors)
-            cutoff_ind = parts_image_gray < 8
-            parts_image_gray[cutoff_ind] = 255
-            parts_image_gray[~cutoff_ind] = 0 # np.minimum(parts_image_gray[~cutoff_ind].astype(np.int16) * 2, 255).astype(np.uint8)
-            
-            h, w = parts_image_gray.shape
-            # embed the image in a larger one with white background (tesseract needs a bit of space around the characters)
+            text_image = _get_text_image(part_image)
+            # embed the text image in a larger one with white background (tesseract needs a bit of space around the characters)
+            h, w = text_image.shape
             tess_image = 255 * np.ones((h + 8, w + 8))
-            tess_image[4:4+h, 4:4+w] = parts_image_gray
+            tess_image[4:4+h, 4:4+w] = text_image
+            
             tess_images.append(tess_image)
             
-#             plt.subplot(3, 1, 1)
-#             plt.imshow(screenshot[y1:y2, x1:x2])
-#             plt.subplot(3, 1, 2)
-#             plt.imshow(part_image[ystart_ind:, :], cmap="gray")
-#             plt.subplot(3, 1, 3)
+#             plt.subplot(2, 1, 1)
+#             plt.imshow(part_image)
+#             plt.subplot(2, 1, 2)
 #             plt.imshow(tess_image, cmap="gray")
 #             plt.show()
         

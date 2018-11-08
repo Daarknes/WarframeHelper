@@ -1,0 +1,399 @@
+{
+  "akbolto_prime": [
+    "barrel",
+    "blueprint",
+    "link",
+    "receiver"
+  ],
+  "akbronco_prime": [
+    "blueprint",
+    "bronco_prime",
+    "bronco_prime",
+    "link"
+  ],
+  "aklex_prime": [
+    "blueprint",
+    "lex_prime",
+    "lex_prime",
+    "link"
+  ],
+  "akstiletto_prime": [
+    "barrel",
+    "blueprint",
+    "link",
+    "receiver"
+  ],
+  "ankyros_prime": [
+    "blade",
+    "blueprint",
+    "gauntlet"
+  ],
+  "ash_prime": [
+    "blueprint",
+    "chassis",
+    "neuroptics",
+    "systems"
+  ],
+  "ballistica_prime": [
+    "blueprint",
+    "lower_limb",
+    "receiver",
+    "string",
+    "upper_limb"
+  ],
+  "banshee_prime": [
+    "blueprint",
+    "chassis",
+    "neuroptics",
+    "systems"
+  ],
+  "bo_prime": [
+    "blueprint",
+    "handle",
+    "ornament"
+  ],
+  "boar_prime": [
+    "barrel",
+    "blueprint",
+    "receiver",
+    "stock"
+  ],
+  "boltor_prime": [
+    "barrel",
+    "blueprint",
+    "receiver",
+    "stock"
+  ],
+  "braton_prime": [
+    "barrel",
+    "blueprint",
+    "receiver",
+    "stock"
+  ],
+  "bronco_prime": [
+    "barrel",
+    "blueprint",
+    "receiver"
+  ],
+  "burston_prime": [
+    "barrel",
+    "blueprint",
+    "receiver",
+    "stock"
+  ],
+  "carrier_prime": [
+    "blueprint",
+    "carapace",
+    "cerebrum",
+    "systems"
+  ],
+  "cernos_prime": [
+    "blueprint",
+    "grip",
+    "lower_limb",
+    "string",
+    "upper_limb"
+  ],
+  "chroma_prime": [
+    "blueprint",
+    "chassis",
+    "neuroptics",
+    "systems"
+  ],
+  "dakra_prime": [
+    "blade",
+    "blueprint",
+    "handle"
+  ],
+  "destreza_prime": [
+    "blade",
+    "blueprint",
+    "handle"
+  ],
+  "dual_kamas_prime": [
+    "blade",
+    "blueprint",
+    "handle"
+  ],
+  "ember_prime": [
+    "blueprint",
+    "chassis",
+    "neuroptics",
+    "systems"
+  ],
+  "euphona_prime": [
+    "barrel",
+    "blueprint",
+    "receiver"
+  ],
+  "fang_prime": [
+    "blade",
+    "blueprint",
+    "handle"
+  ],
+  "fragor_prime": [
+    "blueprint",
+    "handle",
+    "head"
+  ],
+  "frost_prime": [
+    "blueprint",
+    "chassis",
+    "neuroptics",
+    "systems"
+  ],
+  "galatine_prime": [
+    "blade",
+    "blueprint",
+    "handle"
+  ],
+  "glaive_prime": [
+    "blade",
+    "blueprint",
+    "disc"
+  ],
+  "gram_prime": [
+    "blade",
+    "blueprint",
+    "handle"
+  ],
+  "helios_prime": [
+    "blueprint",
+    "carapace",
+    "cerebrum",
+    "systems"
+  ],
+  "hikou_prime": [
+    "blueprint",
+    "pouch",
+    "stars"
+  ],
+  "hydroid_prime": [
+    "blueprint",
+    "chassis",
+    "neuroptics",
+    "systems"
+  ],
+  "kogake_prime": [
+    "blueprint",
+    "boot",
+    "gauntlet"
+  ],
+  "kronen_prime": [
+    "blade",
+    "blueprint",
+    "handle"
+  ],
+  "latron_prime": [
+    "barrel",
+    "blueprint",
+    "receiver",
+    "stock"
+  ],
+  "lex_prime": [
+    "barrel",
+    "blueprint",
+    "receiver"
+  ],
+  "limbo_prime": [
+    "blueprint",
+    "chassis",
+    "neuroptics",
+    "systems"
+  ],
+  "loki_prime": [
+    "blueprint",
+    "chassis",
+    "neuroptics",
+    "systems"
+  ],
+  "mag_prime": [
+    "blueprint",
+    "chassis",
+    "neuroptics",
+    "systems"
+  ],
+  "mirage_prime": [
+    "blueprint",
+    "chassis",
+    "neuroptics",
+    "systems"
+  ],
+  "nami_skyla_prime": [
+    "blade",
+    "blueprint",
+    "handle"
+  ],
+  "nekros_prime": [
+    "blueprint",
+    "chassis",
+    "neuroptics",
+    "systems"
+  ],
+  "nikana_prime": [
+    "blade",
+    "blueprint",
+    "hilt"
+  ],
+  "nova_prime": [
+    "blueprint",
+    "chassis",
+    "neuroptics",
+    "systems"
+  ],
+  "nyx_prime": [
+    "blueprint",
+    "chassis",
+    "neuroptics",
+    "systems"
+  ],
+  "oberon_prime": [
+    "blueprint",
+    "chassis",
+    "neuroptics",
+    "systems"
+  ],
+  "odonata_prime": [
+    "blueprint",
+    "harness",
+    "systems",
+    "wings"
+  ],
+  "orthos_prime": [
+    "blade",
+    "blueprint",
+    "handle"
+  ],
+  "paris_prime": [
+    "blueprint",
+    "grip",
+    "lower_limb",
+    "string",
+    "upper_limb"
+  ],
+  "pyrana_prime": [
+    "barrel",
+    "blueprint",
+    "receiver"
+  ],
+  "reaper_prime": [
+    "blade",
+    "blueprint",
+    "handle"
+  ],
+  "rhino_prime": [
+    "blueprint",
+    "chassis",
+    "neuroptics",
+    "systems"
+  ],
+  "rubico_prime": [
+    "barrel",
+    "blueprint",
+    "receiver",
+    "stock"
+  ],
+  "saryn_prime": [
+    "blueprint",
+    "chassis",
+    "neuroptics",
+    "systems"
+  ],
+  "scindo_prime": [
+    "blade",
+    "blueprint",
+    "handle"
+  ],
+  "sicarus_prime": [
+    "barrel",
+    "blueprint",
+    "receiver"
+  ],
+  "silva_and_aegis_prime": [
+    "blade",
+    "blueprint",
+    "guard",
+    "hilt"
+  ],
+  "soma_prime": [
+    "barrel",
+    "blueprint",
+    "receiver",
+    "stock"
+  ],
+  "spira_prime": [
+    "blade",
+    "blueprint",
+    "pouch"
+  ],
+  "sybaris_prime": [
+    "barrel",
+    "blueprint",
+    "receiver",
+    "stock"
+  ],
+  "tiberon_prime": [
+    "barrel",
+    "blueprint",
+    "receiver",
+    "stock"
+  ],
+  "tigris_prime": [
+    "barrel",
+    "blueprint",
+    "receiver",
+    "stock"
+  ],
+  "trinity_prime": [
+    "blueprint",
+    "chassis",
+    "neuroptics",
+    "systems"
+  ],
+  "valkyr_prime": [
+    "blueprint",
+    "chassis",
+    "neuroptics",
+    "systems"
+  ],
+  "vasto_prime": [
+    "barrel",
+    "blueprint",
+    "receiver"
+  ],
+  "vauban_prime": [
+    "blueprint",
+    "chassis",
+    "neuroptics",
+    "systems"
+  ],
+  "vectis_prime": [
+    "barrel",
+    "blueprint",
+    "receiver",
+    "stock"
+  ],
+  "venka_prime": [
+    "blades",
+    "blueprint",
+    "gauntlet"
+  ],
+  "volt_prime": [
+    "blueprint",
+    "chassis",
+    "neuroptics",
+    "systems"
+  ],
+  "wyrm_prime": [
+    "blueprint",
+    "carapace",
+    "cerebrum",
+    "systems"
+  ],
+  "zephyr_prime": [
+    "blueprint",
+    "chassis",
+    "neuroptics",
+    "systems"
+  ]
+}
