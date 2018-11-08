@@ -95,7 +95,7 @@ class KeyboardThread(QThread):
                 x2, y2 = win32gui.ClientToScreen(hwnd, (x2, y2))
             except:
                 print("could not find and focus the Warframe window. Stacktrace:\n", traceback.print_exc(file=sys.stdout))
-                return
+                continue
             
             for i in range(4):
                 self.textSignal.emit(i, "...")
@@ -112,8 +112,8 @@ class KeyboardThread(QThread):
             if not item_names:
                 for i in range(4):
                     self.textSignal.emit(i, "Error (Could not find item names)")
-                return
-             
+                continue
+            
             item_prices = wfmarket.item_names_to_prices_map(item_names)
             bestLabel = None
             best_quantile = 0

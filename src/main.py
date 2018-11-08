@@ -6,7 +6,8 @@ import traceback
 
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication
-    
+#     import signal
+
     from app import Window
     import warframe_ocr
 
@@ -33,6 +34,7 @@ if __name__ == "__main__":
     # to show exceptions from Qt after crash
     sys.excepthook = excepthook
     
+#     signal.signal(signal.SIGINT, signal.SIG_DFL)
     application = QApplication(sys.argv)
     if platform.system() == "Windows":
         appId = u'warframe_relic_reward_helper'  # arbitrary string

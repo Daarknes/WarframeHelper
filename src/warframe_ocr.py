@@ -7,12 +7,13 @@ import cv2
 import pytesseract
 
 # from decorators import benchmark
-# import matplotlib.pyplot as plt
 import numpy as np
 import math
 from concurrent.futures.process import ProcessPoolExecutor
 import os
 import config
+import matplotlib
+import matplotlib.pyplot as plt
 
 
 pytesseract.pytesseract.tesseract_cmd = config.config["TESSERACT_PATH"]
@@ -113,30 +114,32 @@ def _get_num_players(parts_image, sw, sh):
     
     return num_players
 
-def _filter_gradient(part_image, color_dark, color_bright, dark_tol=5, bright_tol=4):
-    darker_ind = np.any(part_image < color_dark - dark_tol, axis=2)
-    brighter_ind = np.any(part_image > color_bright + bright_tol, axis=2)
+bronze_min = np.array([30 / 360, 0.54, 0.46])
+bronze_max = np.array([34 / 360, 0.83, 0.64])
+silver_min = np.array([0, 0, 0.52])
+silver_max = np.array([2 / 360, 0.02, 0.85])
+gold_min = np.array([45 / 360, 0.51, 0.51])
+gold_max = np.array([51 / 360, 0.56, 0.85])
 
-    image = np.ones(part_image.shape[:2])
-    image[darker_ind | brighter_ind] = 0
+def _filter_gradient(part_image, hsv_min, hsv_max):
+    hsv_image = matplotlib.colors.rgb_to_hsv(part_image / 255)
+    
+    smaller_ind = np.any(hsv_image < hsv_min, axis=2)
+    larger_ind = np.any(hsv_image > hsv_max, axis=2)
+
+    image = np.ones(hsv_image.shape[:2])
+    image[smaller_ind | larger_ind] = 0
     
     return image
-
-bronze_dark = np.array([123, 77, 23])
-bronze_bright = np.array([157, 116, 69])
-silver_dark = np.array([138, 138, 138])
-silver_bright = np.array([211, 211, 211])
-gold_dark = np.array([136, 123, 63])
-gold_bright = np.array([211, 187, 99])
     
 def _get_text_image(part_image):
-    image_bronze = _filter_gradient(part_image, bronze_dark, bronze_bright)
+    image_bronze = _filter_gradient(part_image, bronze_min, bronze_max)
     rowsum_bronze = np.sum(image_bronze, axis=1)
     
-    image_silver = _filter_gradient(part_image, silver_dark, silver_bright, dark_tol=4, bright_tol=0)
+    image_silver = _filter_gradient(part_image, silver_min, silver_max)
     rowsum_silver = np.sum(image_silver, axis=1)
     
-    image_gold = _filter_gradient(part_image, gold_dark, gold_bright)
+    image_gold = _filter_gradient(part_image, gold_min, gold_max)
     rowsum_gold = np.sum(image_gold, axis=1)
     
     # pick the best of the three
@@ -148,10 +151,10 @@ def _get_text_image(part_image):
     s_cutoff = 0.2
     text_y_ind = np.where(rowsum > rowsum.max() * s_cutoff)[0]
     # crop in y-direction
-    image = image[text_y_ind[0]:text_y_ind[-1], :]
+    image = image[text_y_ind[0]:text_y_ind[-1] + 1, :]
     colsum = np.sum(image, axis=0)
-    text_x_ind = np.where(colsum > 1)[0]
-    image = image[:, text_x_ind[0]:text_x_ind[-1]]
+    text_x_ind = np.where(colsum > 0)[0]
+    image = image[:, text_x_ind[0]:text_x_ind[-1] + 1]
     
     # invert colors (so that text is black and the rest white)
     image = 255 * (1 - image)
@@ -167,17 +170,17 @@ def _get_text_image(part_image):
 #     plt.subplot(3, 3, 3)
 #     plt.title("colsum (of the chosen image)")
 #     plt.plot(colsum)
-#      
+#        
 #     plt.subplot(3, 3, 4)
 #     plt.imshow(image_bronze, cmap="gray")
 #     plt.subplot(3, 3, 5)
 #     plt.imshow(image_silver, cmap="gray")
 #     plt.subplot(3, 3, 6)
 #     plt.imshow(image_gold, cmap="gray")
-#     
+#       
 #     plt.subplot(3, 3, 8)
 #     plt.imshow(image, cmap="gray")
-#     
+#       
 #     plt.show()
     
     return image
@@ -192,7 +195,6 @@ def get_item_names(screenshot):
     """
     try:
         screenshot = np.asarray(screenshot)
-        
         tess_images = []
         
         for x1, y1, x2, y2 in _get_name_boxes(screenshot):
@@ -201,8 +203,8 @@ def get_item_names(screenshot):
             text_image = _get_text_image(part_image)
             # embed the text image in a larger one with white background (tesseract needs a bit of space around the characters)
             h, w = text_image.shape
-            tess_image = 255 * np.ones((h + 8, w + 8))
-            tess_image[4:4+h, 4:4+w] = text_image
+            tess_image = 255 * np.ones((h + 12, w + 12))
+            tess_image[6:6+h, 6:6+w] = text_image
             
             tess_images.append(tess_image)
             
