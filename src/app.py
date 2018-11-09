@@ -105,7 +105,7 @@ class KeyboardThread(QThread):
             if config.config["save_screenshot"]:
                 if not os.path.exists("../images/"):
                     os.makedirs("../images/")
-                image.save("../images/{}.png".format(datetime.datetime.now().strftime("%d-%m-%Y_%H-%M-%S")))
+                image.save("../images/{}.png".format(datetime.now().strftime("%d-%m-%Y_%H-%M-%S")))
 
             item_names = warframe_ocr.get_item_names(image)
             print("[Main] item names: ", item_names)
