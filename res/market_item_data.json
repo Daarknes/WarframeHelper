@@ -23,6 +23,12 @@
     "link",
     "receiver"
   ],
+  "akvasto_prime": [
+    "blueprint",
+    "link",
+    "vasto_prime",
+    "vasto_prime"
+  ],
   "ankyros_prime": [
     "blade",
     "blueprint",
