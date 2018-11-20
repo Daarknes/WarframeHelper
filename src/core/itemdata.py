@@ -55,7 +55,7 @@ for item in data:
                 market_component_name = market_component_name.replace(key, value)
                  
             ocr_items.add(item["name"].upper() + " " + ocr_component_name)
-            market_component_names.append(market_component_name)
+            market_component_names.extend([market_component_name] * component["itemCount"])
  
 with open(res_path + "ocr_item_data.json", "w") as f:
     json.dump(list(ocr_items), f, indent="  ")
