@@ -1,37 +1,37 @@
 {
   "akbolto_prime": [
     "barrel",
+    "barrel",
     "blueprint",
     "link",
+    "receiver",
     "receiver"
   ],
   "akbronco_prime": [
     "blueprint",
-    "bronco_prime",
-    "bronco_prime",
     "link"
   ],
   "aklex_prime": [
     "blueprint",
-    "lex_prime",
-    "lex_prime",
     "link"
   ],
   "akstiletto_prime": [
     "barrel",
+    "barrel",
     "blueprint",
     "link",
+    "receiver",
     "receiver"
   ],
   "akvasto_prime": [
     "blueprint",
-    "link",
-    "vasto_prime",
-    "vasto_prime"
+    "link"
   ],
   "ankyros_prime": [
     "blade",
+    "blade",
     "blueprint",
+    "gauntlet",
     "gauntlet"
   ],
   "ash_prime": [
@@ -56,6 +56,7 @@
   "bo_prime": [
     "blueprint",
     "handle",
+    "ornament",
     "ornament"
   ],
   "boar_prime": [
@@ -118,7 +119,9 @@
   ],
   "dual_kamas_prime": [
     "blade",
+    "blade",
     "blueprint",
+    "handle",
     "handle"
   ],
   "ember_prime": [
@@ -134,7 +137,9 @@
   ],
   "fang_prime": [
     "blade",
+    "blade",
     "blueprint",
+    "handle",
     "handle"
   ],
   "fragor_prime": [
@@ -155,6 +160,7 @@
   ],
   "glaive_prime": [
     "blade",
+    "blade",
     "blueprint",
     "disc"
   ],
@@ -172,6 +178,8 @@
   "hikou_prime": [
     "blueprint",
     "pouch",
+    "pouch",
+    "stars",
     "stars"
   ],
   "hydroid_prime": [
@@ -183,11 +191,15 @@
   "kogake_prime": [
     "blueprint",
     "boot",
+    "boot",
+    "gauntlet",
     "gauntlet"
   ],
   "kronen_prime": [
     "blade",
+    "blade",
     "blueprint",
+    "handle",
     "handle"
   ],
   "latron_prime": [
@@ -227,7 +239,9 @@
   ],
   "nami_skyla_prime": [
     "blade",
+    "blade",
     "blueprint",
+    "handle",
     "handle"
   ],
   "nekros_prime": [
@@ -266,6 +280,7 @@
     "wings"
   ],
   "orthos_prime": [
+    "blade",
     "blade",
     "blueprint",
     "handle"
@@ -329,7 +344,9 @@
   ],
   "spira_prime": [
     "blade",
+    "blade",
     "blueprint",
+    "pouch",
     "pouch"
   ],
   "sybaris_prime": [
@@ -381,7 +398,9 @@
   ],
   "venka_prime": [
     "blades",
+    "blades",
     "blueprint",
+    "gauntlet",
     "gauntlet"
   ],
   "volt_prime": [

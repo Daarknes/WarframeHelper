@@ -24,7 +24,7 @@ class Window(QMainWindow):
         QMainWindow.__init__(self)
         
         self.setWindowTitle("Warframe Relic Reward Helper")
-        self.setWindowIcon(QIcon(constants.PATH_RES + "logo.png"))
+        self.setWindowIcon(QIcon(constants.PATH_RES + "relic.png"))
         self.resize(QSize(1200, 700))
         self.setupUi()
         

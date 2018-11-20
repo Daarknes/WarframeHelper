@@ -7,31 +7,23 @@ import os
 
 if __name__ == "__main__":
     from core.config import Config
-    from relicrewards import instance
     
     config = Config()
-    section_ocr = config.addSection("OCR")
-    section_ocr.addEntry("TESSERACT_PATH", r"C:\Program Files\Tesseract\tesseract.exe", "Path to your tesseract.exe")
     
     section_market = config.addSection("Warframe Market")
     section_market.addEntry("MAX_ORDER_AGE", 24, "only include orders of players that are either in-game, or that have been updated in the last X hours (DEFAULT: 24)")
     section_market.addEntry("MAX_UPDATE_AGE", 24, "The local market data (the prices) gets updated after this amount of hours (DEFAULT: 24)")
     
-    section_gui = config.addSection("GUI")
-    section_gui.addEntry("HOTKEY", "alt+m", "The hotkey to press (DEFAULT: 'alt+m')")
-    section_gui.addEntry("save_screenshot", True, "Saves the screenshot to the 'images/'-folder when the hotkey is pressed (debug) (DEFAULT: True)")
-    
     config.build()
     config.loadAndUpdate(os.path.join(os.path.dirname(__file__), "config.cfg"))
-    instance.setConfig(config)
+#     instance.setConfig(config)
 
     # load (and possibly update) warframe market
     from core import wfmarket
     wfmarket.load(config["MAX_UPDATE_AGE"], config["MAX_ORDER_AGE"])
 
     from PyQt5.QtWidgets import QApplication
-    from relicrewards.app import Window
-    from relicrewards import warframe_ocr
+    from market.app import Window
 
 
 def excepthook(excType, excValue, tracebackobj):
@@ -59,13 +51,11 @@ if __name__ == "__main__":
 #     signal.signal(signal.SIGINT, signal.SIG_DFL)
     application = QApplication(sys.argv)
     if platform.system() == "Windows":
-        appId = u'warframe_relic_reward_helper'  # arbitrary string
+        appId = u'warframe_market_helper'  # arbitrary string
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(appId)
     
     window = Window()
-    warframe_ocr.init()
     window.show()
     
     exitCode = application.exec_()
-    warframe_ocr.cleanup()
     sys.exit(exitCode)
