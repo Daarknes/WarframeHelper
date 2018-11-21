@@ -5,22 +5,24 @@ import sys
 import traceback
 import os
 
-if __name__ == "__main__":
-    from core.config import Config
-    
-    config = Config()
-    
-    section_market = config.addSection("Warframe Market")
-    section_market.addEntry("MAX_ORDER_AGE", 24, "only include orders of players that are either in-game, or that have been updated in the last X hours (DEFAULT: 24)")
-    section_market.addEntry("MAX_UPDATE_AGE", 24, "The local market data (the prices) gets updated after this amount of hours (DEFAULT: 24)")
-    
-    config.build()
-    config.loadAndUpdate(os.path.join(os.path.dirname(__file__), "config.cfg"))
-#     instance.setConfig(config)
 
+from core.config import Config
+config = Config()
+
+section_market = config.addSection("Warframe Market")
+section_market.addEntry("MAX_CONNECTIONS", 100, "The maximum number of simultaneous threads for http-requests (DEFAULT: 100)")
+section_market.addEntry("MAX_ORDER_AGE", 24, "only include orders of players that are either in-game, or that have been updated in the last X hours (DEFAULT: 24)")
+section_market.addEntry("MAX_UPDATE_AGE", 24, "The local market data (the prices) gets updated after this amount of hours (DEFAULT: 24)")
+
+config.build()
+config.loadAndUpdate(os.path.join(os.path.dirname(__file__), "config.cfg"))
+
+#     instance.setConfig(config)
+    
+if __name__ == "__main__":
     # load (and possibly update) warframe market
     from core import wfmarket
-    wfmarket.load(config["MAX_UPDATE_AGE"], config["MAX_ORDER_AGE"])
+    wfmarket.load(config["MAX_CONNECTIONS"], config["MAX_UPDATE_AGE"], config["MAX_ORDER_AGE"])
 
     from PyQt5.QtWidgets import QApplication
     from market.app import Window

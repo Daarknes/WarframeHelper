@@ -5,14 +5,21 @@ import traceback
 import sys
 import os
 from core import constants
+from concurrent.futures.thread import ThreadPoolExecutor
+from util.printutil import ProgressBar
 
 
 _address = "https://api.warframe.market/v1/items/{}/orders?include=item"
 
 _warframe_parts = ["chassis", "systems", "neuroptics"]
 _special_map = {
-    "&": "and"
+    "&": "and",
+    "'": "",
+    "-": "_"
 }
+
+CAT_ITEMS = "items"
+CAT_MODS = "mods"
 
 def _convert_to_market_name(raw_item_name):
     words = raw_item_name.lower().split()
@@ -25,10 +32,116 @@ def _convert_to_market_name(raw_item_name):
 
     return market_name
 
-#@benchmark
+class Info():
+    def __init__(self, name, category, bonus=None):
+        self.name = name
+        self.category = category
+        self.bonus = bonus
+    
+    def __str__(self):
+        return self.name + ("" if self.bonus is None else "_" + self.bonus)
+
+    def __repr__(self):
+        return "[{}] {}".format(self.category, self.name) + ("" if self.bonus is None else "_" + self.bonus)
+
+def load(max_connections, max_update_age, max_order_age):
+    global _name_to_info, _market_prices
+
+    if not os.path.exists(constants.MARKET_PRICES_LOC):
+        update(max_connections, max_order_age)
+    else:
+        with open(constants.MARKET_PRICES_LOC, "r") as f:
+            _market_prices = json.load(f)
+        
+        current_date = datetime.now()
+        update_date = datetime.strptime(_market_prices["last_update"], "%d-%m-%Y_%H-%M-%S")
+        delta = current_date - update_date
+        if (delta.days * 24 + delta.seconds // 3600) > max_update_age:
+            update(max_connections, max_order_age)
+        else:
+            for item_name, item_data in _market_prices["items"].items():
+                info = Info(item_name, CAT_ITEMS, "set")
+                _name_to_info[str(info)] = info
+                for component_name in item_data["components"].keys():
+                    info = Info(item_name, CAT_ITEMS, component_name)
+                    _name_to_info[str(info)] = info
+            
+            for mod_name in _market_prices["mods"].keys():
+                info = Info(mod_name, CAT_MODS)
+                _name_to_info[str(info)] = info
+
+            print("[WFMarket] Market data successfully loaded (last update was on {}).".format(datetime.strftime(update_date, "%d.%m.%Y-%H:%M:%S")))
+    
+    global _loaded
+    _loaded = True
+
+def update(max_connections, max_order_age):
+    global _name_to_info, _market_prices
+    
+    print("[WFMarket] updating market prices. This may take a while.")
+    with open(constants.MARKET_NAMES_LOC, "r", encoding="utf-8") as f:
+        market_names = json.load(f)
+
+    _market_prices = {
+        "last_update": datetime.now().strftime("%d-%m-%Y_%H-%M-%S"),
+        "items": {},
+        "mods": {}
+    }
+    
+    infos =  []
+
+    for item_name, components in market_names["items"].items():
+        info = Info(item_name, CAT_ITEMS, "set")
+        _name_to_info[str(info)] = info
+        infos.append(info)
+
+        for comp_name in set(components):
+            # only add components, not separate items (this is not a part)
+            if comp_name not in market_names["items"]:
+                info = Info(item_name, CAT_ITEMS, comp_name)
+                _name_to_info[str(info)] = info
+                infos.append(info)
+
+    for mod_name in market_names["mods"]:
+        info = Info(mod_name, CAT_MODS)
+        _name_to_info[str(info)] = info
+        infos.append(info)
+    
+    i = 0
+    progress = ProgressBar(40, len(infos)-1)
+    def request_prices(info):
+        prices = _request_prices(str(info), max_order_age)
+        # update progress bar
+        nonlocal i
+        i += 1
+        progress.update(i)
+        return prices
+    
+    with ThreadPoolExecutor(max_workers=max_connections) as ex:
+        prices = ex.map(request_prices, infos)
+
+    for info, prices in zip(infos, prices):
+        if info.category == CAT_ITEMS:
+            # when the item is not yet present, add an entry in the dict
+            if info.name not in _market_prices["items"]:
+                _market_prices["items"][info.name] = {}
+            
+            item_data = _market_prices["items"][info.name]
+            if info.bonus == "set":
+                item_data["set"] = prices
+            else:
+                if "components" not in item_data:
+                    item_data["components"] = {}
+                item_data["components"][info.bonus] = prices
+        elif info.category == CAT_MODS:
+            _market_prices["mods"][info.name] = prices
+    
+    with open(constants.MARKET_PRICES_LOC, "w") as f:
+        json.dump(_market_prices, f, indent=2)
+
 def _request_prices(market_item_name, max_order_age):
     try:
-        print("[WFMarket] searching on '" + _address.format(market_item_name) + "' for orders.")
+#         print("[WFMarket] searching on '" + _address.format(market_item_name) + "' for orders.")
         page = requests.get(_address.format(market_item_name))
         data = json.loads(page.content.decode("utf-8"))
         current_date = datetime.now()
@@ -52,70 +165,6 @@ def _request_prices(market_item_name, max_order_age):
         print("[WFMarket] Error while requesting data for '{}'".format(market_item_name), traceback.print_exc(file=sys.stdout))
         return None
 
-def load(max_update_age, max_order_age):
-    global _market_data, _names_to_prices
-
-    if not os.path.exists(constants.MARKET_PRICES):
-        update(max_order_age)
-    else:
-        with open(constants.MARKET_PRICES, "r") as f:
-            _market_data = json.load(f)
-        
-        current_date = datetime.now()
-        update_date = datetime.strptime(_market_data["last_update"], "%d-%m-%Y_%H-%M-%S")
-        delta = current_date - update_date
-        if (delta.days * 24 + delta.seconds // 3600) > max_update_age:
-            update(max_order_age)
-        else:
-            for item_name, item_data in _market_data["items"].items():
-                for component_name, prices in item_data["components"].items():
-                    if prices is not None:
-                        _names_to_prices[item_name + "_" + component_name] = prices
-            print("[WFMarket] Market data successfully loaded (last update was on {}).".format(datetime.strftime(update_date, "%d.%m.%Y-%H:%M:%S")))
-    
-    global _loaded
-    _loaded = True
-
-def _process_item(market_item_names, item_name, components, max_order_age):
-    global _market_data, _names_to_prices
-
-    # first request the set prices
-    set_prices = _request_prices(item_name + "_set", max_order_age)
-    
-    component_data = {}
-    _market_data["items"][item_name] = {"set": set_prices, "components": component_data}
-    
-    for component_name in components:
-        # this component is a separate item (not a part)
-        if component_name in market_item_names:
-            # mark as reference via None
-            component_data[component_name] = None
-            _process_item(market_item_names, component_name, market_item_names[component_name], max_order_age)
-        else:
-            prices = _request_prices(item_name + "_" + component_name, max_order_age)
-            component_data[component_name] = prices
-            _names_to_prices[item_name + "_" + component_name] = prices
-
-def update(max_order_age):
-    global _market_data, _names_to_prices
-    
-    print("[WFMarket] updating market prices. This may take a while.")
-    with open(constants.MARKET_ITEM_DATA, "r", encoding="utf-8") as f:
-        market_item_names = json.load(f)
-
-    _market_data.clear()
-    _names_to_prices.clear()
-    
-    _market_data["last_update"] = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
-    _market_data["items"] = {}
-    
-    for item_name, components in market_item_names.items():
-        if item_name not in _market_data["items"]:
-            _process_item(market_item_names, item_name, components, max_order_age)
-    
-    with open(constants.MARKET_PRICES, "w") as f:
-        json.dump(_market_data, f, indent="  ")
-
 def item_names_to_prices_map(item_names):
     if not _loaded:
         raise Exception("[WFMarket] not loaded, call wfmarket.load(max_update_age, max_order_age) first.")
@@ -128,16 +177,23 @@ def item_names_to_prices_map(item_names):
             name_to_prices[item_name] = []
         else:
             market_name = _convert_to_market_name(item_name)
-            name_to_prices[item_name] = _names_to_prices[market_name]
+            info = _name_to_info[market_name]
+            if info.category == CAT_ITEMS:
+                if info.component == "set":
+                    name_to_prices[item_name] = _market_prices["items"][info.name]["set"]
+                else:                
+                    name_to_prices[item_name] = _market_prices["items"][info.name]["components"][info.component]
+            elif info.category == CAT_MODS:
+                name_to_prices[item_name] = _market_prices["mods"][info.name]
 
     return name_to_prices
 
-def get_all():
+def get_all(category):
     if not _loaded:
         raise Exception("[WFMarket] not loaded, call wfmarket.load(max_update_age, max_order_age) first.")
 
-    return _market_data["items"]
+    return _market_prices[category]
 
 _loaded = False
-_market_data = {}
-_names_to_prices = {}
+_name_to_info = {}
+_market_prices = {}

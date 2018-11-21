@@ -223,7 +223,7 @@ def get_item_names(screenshot):
         return []
 
 
-with open(constants.PATH_RES + "ocr_item_data.json", "r", encoding="utf-8") as f:
+with open(constants.OCR_NAMES_LOC, "r", encoding="utf-8") as f:
     item_database = json.load(f)
 
 #@benchmark 
