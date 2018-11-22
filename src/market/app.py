@@ -61,7 +61,7 @@ class Window(QMainWindow):
         for i, (item_name, components) in enumerate(market_names["items"].items()):
             item_prices = market_data[item_name]
             set_repr = calc_sell_repr(item_prices["set"])
-            
+                    
             comp_repr = calc_comp_repr(item_prices["components"], components)
             if comp_repr is None:
                 continue
