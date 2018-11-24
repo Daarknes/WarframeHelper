@@ -131,6 +131,11 @@
             "neuroptics",
             "systems"
         ],
+        "euphona_prime": [
+            "barrel",
+            "blueprint",
+            "receiver"
+        ],
         "fang_prime": [
             "blade",
             "blade",
@@ -292,6 +297,11 @@
             "barrel",
             "blueprint",
             "receiver"
+        ],
+        "reaper_prime": [
+            "blade",
+            "blueprint",
+            "handle"
         ],
         "rhino_prime": [
             "blueprint",
@@ -858,7 +868,7 @@
         "medi_ray",
         "melee_prowess",
         "mending_splinters",
-        "mesa's_waltz",
+        "mesa\u2019s_waltz",
         "metal_auger",
         "metal_fiber",
         "meteor_crash",

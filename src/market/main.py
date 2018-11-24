@@ -11,7 +11,7 @@ config = Config()
 
 section_market = config.addSection("Warframe Market")
 section_market.addEntry("MAX_CONNECTIONS", 100, "The maximum number of simultaneous threads for http-requests (DEFAULT: 100)")
-section_market.addEntry("MAX_ORDER_AGE", 24, "only include orders of players that are either in-game, or that have been updated in the last X hours (DEFAULT: 24)")
+section_market.addEntry("MAX_ORDER_AGE", 12, "only include orders of players that are either in-game, or that have been updated in the last X hours (DEFAULT: 12)")
 section_market.addEntry("MAX_UPDATE_AGE", 24, "The local market data (the prices) gets updated after this amount of hours (DEFAULT: 24)")
 
 config.build()

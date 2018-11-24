@@ -116,13 +116,13 @@ def update(max_order_age):
     with open(constants.MARKET_PRICES_LOC, "w") as f:
         json.dump(_market_data, f, indent="  ")
 
-def item_names_to_prices_map(item_names):
+def item_names_to_prices_map(ocr_item_names):
     if not _loaded:
         raise Exception("[WFMarket] not loaded, call wfmarket.load(max_update_age, max_order_age) first.")
 
     name_to_prices = {}
     
-    for item_name in set(item_names):
+    for item_name in set(ocr_item_names):
         # exclude forma since it can't be sold
         if item_name == "FORMA BLUEPRINT" or item_name == "ERROR":
             name_to_prices[item_name] = []

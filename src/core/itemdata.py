@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 import json
 from core import constants
 
@@ -60,7 +63,7 @@ def process_item(item):
 _special_mods = {
     "ambush_optics": "ambush_optics_(rubico)",
     "brain_storm": "brain_storm_(grakata)",
-    "mesas_waltz": "mesa’s_waltz",
+    "mesas_waltz": "mesaâ€™s_waltz",
     "primed_pistol_ammo_mutation": "primed_pistol_mutation",
     "shrapnel_rounds": "shrapnel_rounds_(marelok)",
     "skull_shots": "skull_shots_(viper)",
@@ -70,7 +73,7 @@ _special_mods = {
 }
 def process_mod(mod):
     # ignore rivens
-    if "Riven" in mod["name"].split(" "):
+    if not entry["tradable"] or "Riven" in mod["name"].split(" "):
         return
 
     mod_name = get_market_name(mod)
@@ -85,7 +88,7 @@ category_funcs = {
 
 
 for entry in data:
-    if entry["tradable"] and entry["category"] in category_funcs:
+    if entry["category"] in category_funcs:
         category_funcs[entry["category"]](entry)
 
 with open(constants.OCR_NAMES_LOC, "w") as f:

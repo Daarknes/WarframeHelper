@@ -7,6 +7,7 @@ import os
 from core import constants
 from concurrent.futures.thread import ThreadPoolExecutor
 from util.printutil import ProgressBar
+import time
 
 
 _address = "https://api.warframe.market/v1/items/{}/orders?include=item"
@@ -32,7 +33,7 @@ def _convert_to_market_name(raw_item_name):
 
     return market_name
 
-class Info():
+class _Info():
     def __init__(self, name, category, bonus=None):
         self.name = name
         self.category = category
@@ -60,14 +61,14 @@ def load(max_connections, max_update_age, max_order_age):
             update(max_connections, max_order_age)
         else:
             for item_name, item_data in _market_prices["items"].items():
-                info = Info(item_name, CAT_ITEMS, "set")
+                info = _Info(item_name, CAT_ITEMS, "set")
                 _name_to_info[str(info)] = info
                 for component_name in item_data["components"].keys():
-                    info = Info(item_name, CAT_ITEMS, component_name)
+                    info = _Info(item_name, CAT_ITEMS, component_name)
                     _name_to_info[str(info)] = info
             
             for mod_name in _market_prices["mods"].keys():
-                info = Info(mod_name, CAT_MODS)
+                info = _Info(mod_name, CAT_MODS)
                 _name_to_info[str(info)] = info
 
             print("[WFMarket] Market data successfully loaded (last update was on {}).".format(datetime.strftime(update_date, "%d.%m.%Y-%H:%M:%S")))
@@ -91,19 +92,19 @@ def update(max_connections, max_order_age):
     infos =  []
 
     for item_name, components in market_names["items"].items():
-        info = Info(item_name, CAT_ITEMS, "set")
+        info = _Info(item_name, CAT_ITEMS, "set")
         _name_to_info[str(info)] = info
         infos.append(info)
 
         for comp_name in set(components):
             # only add components, not separate items (this is not a part)
             if comp_name not in market_names["items"]:
-                info = Info(item_name, CAT_ITEMS, comp_name)
+                info = _Info(item_name, CAT_ITEMS, comp_name)
                 _name_to_info[str(info)] = info
                 infos.append(info)
 
     for mod_name in market_names["mods"]:
-        info = Info(mod_name, CAT_MODS)
+        info = _Info(mod_name, CAT_MODS)
         _name_to_info[str(info)] = info
         infos.append(info)
     
@@ -142,36 +143,49 @@ def update(max_connections, max_order_age):
 def _request_prices(market_item_name, max_order_age):
     try:
 #         print("[WFMarket] searching on '" + _address.format(market_item_name) + "' for orders.")
-        page = requests.get(_address.format(market_item_name))
-        data = json.loads(page.content.decode("utf-8"))
+        while True:
+            response = requests.get(_address.format(market_item_name))
+            if response.status_code == requests.codes["not_found"]:
+                return None
+            elif response.status_code == requests.codes["service_unavailable"]:
+                # try again in 100ms
+                time.sleep(0.1)
+                continue
+            else:
+                break
+
+        data = json.loads(response.content.decode("utf-8"))
         current_date = datetime.now()
     
-        prices = []
+        prices = {"buy": [], "sell": []}
         for order in data["payload"]["orders"]:
             # first filter on platform, order type (we only want sell values) and visibility
-            if order["platform"] == "pc" and order["order_type"] == "sell" and order["visible"]:
+            if order["platform"] == "pc" and order["visible"]:
                 if order["user"]["status"] == "ingame":
-                    prices.append(order["platinum"])
+                    prices[order["order_type"]].append(order["platinum"])
                 # otherwise check the time since last update of the order
                 else:
                     last_updated = datetime.strptime(order["last_update"], "%Y-%m-%dT%H:%M:%S.%f+00:00")
                     delta = current_date - last_updated
                     order_age = delta.days * 24 + delta.seconds // 3600
                     if order_age < max_order_age:
-                        prices.append(order["platinum"])
-                
-        return sorted(prices)
+                        prices[order["order_type"]].append(order["platinum"])
+
+        prices["buy"].sort(reverse=True)
+        prices["sell"].sort()
+        return prices
     except:
-        print("[WFMarket] Error while requesting data for '{}'".format(market_item_name), traceback.print_exc(file=sys.stdout))
+        print("[WFMarket] Error while requesting data for '{}' (status code {})".format(market_item_name, response.status_code))
+        print(traceback.print_exc(file=sys.stdout))
         return None
 
-def item_names_to_prices_map(item_names):
+def item_names_to_prices_map(ocr_item_names):
     if not _loaded:
         raise Exception("[WFMarket] not loaded, call wfmarket.load(max_update_age, max_order_age) first.")
 
     name_to_prices = {}
     
-    for item_name in set(item_names):
+    for item_name in set(ocr_item_names):
         # exclude forma since it can't be sold
         if item_name == "FORMA BLUEPRINT" or item_name == "ERROR":
             name_to_prices[item_name] = []
@@ -179,10 +193,10 @@ def item_names_to_prices_map(item_names):
             market_name = _convert_to_market_name(item_name)
             info = _name_to_info[market_name]
             if info.category == CAT_ITEMS:
-                if info.component == "set":
-                    name_to_prices[item_name] = _market_prices["items"][info.name]["set"]
+                if info.bonus == "set":
+                    name_to_prices[item_name] = _market_prices["items"][info.name]["set"]["sell"]
                 else:                
-                    name_to_prices[item_name] = _market_prices["items"][info.name]["components"][info.component]
+                    name_to_prices[item_name] = _market_prices["items"][info.name]["components"][info.bonus]["sell"]
             elif info.category == CAT_MODS:
                 name_to_prices[item_name] = _market_prices["mods"][info.name]
 

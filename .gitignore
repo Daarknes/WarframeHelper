@@ -17,6 +17,7 @@ tmp/
 # other
 *.cfg
 *.cprof
+res/market_prices.json
 
 *.pdf
 *.aux
