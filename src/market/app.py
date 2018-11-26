@@ -1,18 +1,19 @@
+import json
+
+from PyQt5.Qt import Qt
 from PyQt5.QtCore import QSize
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QMainWindow, QTableWidget, QTableWidgetItem, QTabWidget,\
-    QListWidget, QHeaderView
+from PyQt5.QtWidgets import QMainWindow, QTableWidget, QTableWidgetItem, QTabWidget, QHeaderView
 
 from core import constants, wfmarket
-from PyQt5.Qt import Qt
-import json
+from market import instance
 
 
 def calc_sell_repr(prices):
     if not prices:
         return None
     else:
-        # take 0.3 quantile for selling representant
+        # take 0.3 quantile for selling representative
         return prices[int(0.3 * len(prices))]
 
 def calc_buy_repr(prices):
@@ -75,10 +76,10 @@ class Window(QMainWindow):
 
         for i, (item_name, components) in enumerate(market_names["items"].items()):
             item_prices = market_data[item_name]
-            set_repr = calc_sell_repr(item_prices["set"]["sell"])
+            set_repr = instance.config["calc_sell_repr"](item_prices["set"]["sell"]) #calc_sell_repr(item_prices["set"]["sell"])
             
-            comp_sell_repr = calc_comp_repr(item_prices["components"], components, "sell")
-            comp_buy_repr = calc_comp_repr(item_prices["components"], components, "buy")
+            comp_sell_repr = instance.config["calc_component_repr"](item_prices["components"], components, "sell") # calc_comp_repr(item_prices["components"], components, "sell")
+            comp_buy_repr = instance.config["calc_component_repr"](item_prices["components"], components, "buy") #calc_comp_repr(item_prices["components"], components, "buy")
 
             
             table.setItem(i, 0, QTableWidgetItem(" ".join(item_name.split("_"))))

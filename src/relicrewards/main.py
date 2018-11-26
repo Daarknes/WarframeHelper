@@ -3,32 +3,27 @@ import ctypes
 import platform
 import sys
 import traceback
-import os
 
 from core.config import Config
 from relicrewards import instance
-config = Config()
+from core import constants
+_config = Config()
 
-section_ocr = config.addSection("OCR")
+section_ocr = _config.addSection("OCR")
 section_ocr.addEntry("TESSERACT_PATH", r"C:\Program Files\Tesseract\tesseract.exe", "Path to your tesseract.exe")
 
-section_market = config.addSection("Warframe Market")
-section_market.addEntry("MAX_CONNECTIONS", 100, "The maximum number of simultaneous threads for http-requests (DEFAULT: 100)")
-section_market.addEntry("MAX_ORDER_AGE", 12, "only include orders of players that are either in-game, or that have been updated in the last X hours (DEFAULT: 12)")
-section_market.addEntry("MAX_UPDATE_AGE", 24, "The local market data (the prices) gets updated after this amount of hours (DEFAULT: 24)")
-
-section_gui = config.addSection("GUI")
+section_gui = _config.addSection("GUI")
 section_gui.addEntry("HOTKEY", "alt+m", "The hotkey to press (DEFAULT: 'alt+m')")
 section_gui.addEntry("save_screenshot", True, "Saves the screenshot to the 'images/'-folder when the hotkey is pressed (debug) (DEFAULT: True)")
 
-config.build()
-config.loadAndUpdate(os.path.join(os.path.dirname(__file__), "config.cfg"))
-instance.setConfig(config)
+_config.build()
+_config.loadAndUpdate(constants.CONFIG_LOC + "relicrewardhelper.cfg")
+instance.setConfig(_config)
 
 if __name__ == "__main__":
     # load (and possibly update) warframe market
     from core import wfmarket
-    wfmarket.load(config["MAX_CONNECTIONS"], config["MAX_UPDATE_AGE"], config["MAX_ORDER_AGE"])
+    wfmarket.load()
 
     from PyQt5.QtWidgets import QApplication
     from relicrewards.app import Window

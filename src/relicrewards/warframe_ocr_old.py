@@ -12,10 +12,10 @@ import numpy as np
 import math
 from concurrent.futures.process import ProcessPoolExecutor
 import os
-from core import config
+from core import _config
 
 
-pytesseract.pytesseract.tesseract_cmd = config.config["TESSERACT_PATH"]
+pytesseract.pytesseract.tesseract_cmd = _config.config["TESSERACT_PATH"]
 
 # threshhold for the checkbox pattern matching which evaluates the number of players
 CHECKMARK_MATCH_THRESHHOLD = 0.15

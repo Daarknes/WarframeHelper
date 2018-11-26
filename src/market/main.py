@@ -6,23 +6,46 @@ import traceback
 import os
 
 
-from core.config import Config
+from core.config import Config, FunctionBlock
+from core import constants
+from market import instance
+
 config = Config()
 
-section_market = config.addSection("Warframe Market")
-section_market.addEntry("MAX_CONNECTIONS", 100, "The maximum number of simultaneous threads for http-requests (DEFAULT: 100)")
-section_market.addEntry("MAX_ORDER_AGE", 12, "only include orders of players that are either in-game, or that have been updated in the last X hours (DEFAULT: 12)")
-section_market.addEntry("MAX_UPDATE_AGE", 24, "The local market data (the prices) gets updated after this amount of hours (DEFAULT: 24)")
+section_funcs = config.addSection("Functions")
+section_funcs.addEntry("calc_sell_repr", FunctionBlock(r'''if not prices:
+    return None
+else:
+    # take 0.3 quantile for selling representative
+    return prices[int(0.3 * len(prices))]''', "prices"), "calculates a sell-price-representative from price-data")
+
+section_funcs.addEntry("calc_buy_repr", FunctionBlock(r'''if not prices:
+    return None
+else:
+    # for buying only include the cheapest 4
+    return sum(prices[:10]) // len(prices[:10])''', "prices"), "calculates a buy-price-representative from price-data")
+
+section_funcs.addEntry("calc_component_repr", FunctionBlock(r'''comp_repr = 0
+for comp_name in component_names:
+    if prices[comp_name] is None:
+        return None
+    comp_prices = prices[comp_name][order_type]
+
+    buy_repr = calc_buy_repr(comp_prices)
+    if buy_repr is None:
+        return None
+
+    comp_repr += buy_repr
+return comp_repr''', "prices, component_names, order_type"), "calculates a buy-price-representative from price-data")
 
 config.build()
-config.loadAndUpdate(os.path.join(os.path.dirname(__file__), "config.cfg"))
-
-#     instance.setConfig(config)
+config.loadAndUpdate(os.path.join(constants.CONFIG_LOC, "markethelper.cfg"))
+instance.setConfig(config)
     
 if __name__ == "__main__":
     # load (and possibly update) warframe market
     from core import wfmarket
-    wfmarket.load(config["MAX_CONNECTIONS"], config["MAX_UPDATE_AGE"], config["MAX_ORDER_AGE"])
+    wfmarket.load()
 
     from PyQt5.QtWidgets import QApplication
     from market.app import Window

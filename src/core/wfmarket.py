@@ -8,6 +8,7 @@ from core import constants
 from concurrent.futures.thread import ThreadPoolExecutor
 from util.printutil import ProgressBar
 import time
+from core.config import Config
 
 
 _address = "https://api.warframe.market/v1/items/{}/orders?include=item"
@@ -21,6 +22,17 @@ _special_map = {
 
 CAT_ITEMS = "items"
 CAT_MODS = "mods"
+
+# _config
+_config = Config()
+
+_section_market = _config.addSection("Warframe Market")
+_section_market.addEntry("MAX_CONNECTIONS", 100, "The maximum number of simultaneous threads for http-requests (DEFAULT: 100)")
+_section_market.addEntry("MAX_ORDER_AGE", 12, "only include orders of players that are either in-game, or that have been updated in the last X hours (DEFAULT: 12)")
+_section_market.addEntry("MAX_UPDATE_AGE", 24, "The local market data (the prices) gets updated after this amount of hours (DEFAULT: 24)")
+
+_config.build()
+_config.loadAndUpdate(os.path.join(constants.CONFIG_LOC, "warframemarket.cfg"))
 
 def _convert_to_market_name(raw_item_name):
     words = raw_item_name.lower().split()
@@ -45,11 +57,11 @@ class _Info():
     def __repr__(self):
         return "[{}] {}".format(self.category, self.name) + ("" if self.bonus is None else "_" + self.bonus)
 
-def load(max_connections, max_update_age, max_order_age):
+def load():
     global _name_to_info, _market_prices
 
     if not os.path.exists(constants.MARKET_PRICES_LOC):
-        update(max_connections, max_order_age)
+        update()
     else:
         with open(constants.MARKET_PRICES_LOC, "r") as f:
             _market_prices = json.load(f)
@@ -57,8 +69,8 @@ def load(max_connections, max_update_age, max_order_age):
         current_date = datetime.now()
         update_date = datetime.strptime(_market_prices["last_update"], "%d-%m-%Y_%H-%M-%S")
         delta = current_date - update_date
-        if (delta.days * 24 + delta.seconds // 3600) > max_update_age:
-            update(max_connections, max_order_age)
+        if (delta.days * 24 + delta.seconds // 3600) > _config["MAX_UPDATE_AGE"]:
+            update()
         else:
             for item_name, item_data in _market_prices["items"].items():
                 info = _Info(item_name, CAT_ITEMS, "set")
@@ -76,7 +88,7 @@ def load(max_connections, max_update_age, max_order_age):
     global _loaded
     _loaded = True
 
-def update(max_connections, max_order_age):
+def update():
     global _name_to_info, _market_prices
     
     print("[WFMarket] updating market prices. This may take a while.")
@@ -111,14 +123,14 @@ def update(max_connections, max_order_age):
     i = 0
     progress = ProgressBar(40, len(infos)-1)
     def request_prices(info):
-        prices = _request_prices(str(info), max_order_age)
+        prices = _request_prices(str(info))
         # update progress bar
         nonlocal i
         i += 1
         progress.update(i)
         return prices
     
-    with ThreadPoolExecutor(max_workers=max_connections) as ex:
+    with ThreadPoolExecutor(max_workers=_config["MAX_CONNECTIONS"]) as ex:
         prices = ex.map(request_prices, infos)
 
     for info, prices in zip(infos, prices):
@@ -140,7 +152,8 @@ def update(max_connections, max_order_age):
     with open(constants.MARKET_PRICES_LOC, "w") as f:
         json.dump(_market_prices, f, indent=2)
 
-def _request_prices(market_item_name, max_order_age):
+def _request_prices(market_item_name):
+    response = None
     try:
 #         print("[WFMarket] searching on '" + _address.format(market_item_name) + "' for orders.")
         while True:
@@ -168,14 +181,14 @@ def _request_prices(market_item_name, max_order_age):
                     last_updated = datetime.strptime(order["last_update"], "%Y-%m-%dT%H:%M:%S.%f+00:00")
                     delta = current_date - last_updated
                     order_age = delta.days * 24 + delta.seconds // 3600
-                    if order_age < max_order_age:
+                    if order_age < _config["MAX_ORDER_AGE"]:
                         prices[order["order_type"]].append(order["platinum"])
 
         prices["buy"].sort(reverse=True)
         prices["sell"].sort()
         return prices
     except:
-        print("[WFMarket] Error while requesting data for '{}' (status code {})".format(market_item_name, response.status_code))
+        print("[WFMarket] Error while requesting data for '{}' (status code {})".format(market_item_name, response.status_code if response else response))
         print(traceback.print_exc(file=sys.stdout))
         return None
 
