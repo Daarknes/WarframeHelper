@@ -13,17 +13,18 @@ from market import instance
 config = Config()
 
 section_funcs = config.addSection("Functions")
+section_funcs.addEntry("calc_buy_repr", FunctionBlock(r'''if not prices:
+    return None
+else:
+    # for buying only include the cheapest 10%
+    n = int(len(prices) * 0.1 + 0.95)
+    return sum(prices[:n]) // n''', "prices"), "calculates a buy-price-representative from price-data for a single component")
+
 section_funcs.addEntry("calc_sell_repr", FunctionBlock(r'''if not prices:
     return None
 else:
     # take 0.3 quantile for selling representative
-    return prices[int(0.3 * len(prices))]''', "prices"), "calculates a sell-price-representative from price-data")
-
-section_funcs.addEntry("calc_buy_repr", FunctionBlock(r'''if not prices:
-    return None
-else:
-    # for buying only include the cheapest 4
-    return sum(prices[:10]) // len(prices[:10])''', "prices"), "calculates a buy-price-representative from price-data")
+    return prices[int(0.3 * len(prices))]''', "prices"), "calculates a sell-price-representative from price-data for a single component")
 
 section_funcs.addEntry("calc_component_repr", FunctionBlock(r'''comp_repr = 0
 for comp_name in component_names:
@@ -36,7 +37,7 @@ for comp_name in component_names:
         return None
 
     comp_repr += buy_repr
-return comp_repr''', "prices, component_names, order_type"), "calculates a buy-price-representative from price-data")
+return comp_repr''', "prices, component_names, order_type"), "calculates a buy-price-representative for a set of components from price-data")
 
 config.build()
 config.loadAndUpdate(os.path.join(constants.CONFIG_LOC, "markethelper.cfg"))
