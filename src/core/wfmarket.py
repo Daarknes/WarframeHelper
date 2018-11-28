@@ -121,7 +121,7 @@ def update():
         infos.append(info)
     
     i = 0
-    progress = ProgressBar(40, len(infos)-1)
+    progress = ProgressBar(40, len(infos))
     def request_prices(info):
         prices = _request_prices(str(info))
         # update progress bar
@@ -161,8 +161,8 @@ def _request_prices(market_item_name):
             if response.status_code == requests.codes["not_found"]:
                 return None
             elif response.status_code == requests.codes["service_unavailable"]:
-                # try again in 100ms
-                time.sleep(0.1)
+                # try again in 1s
+                time.sleep(1)
                 continue
             else:
                 break
