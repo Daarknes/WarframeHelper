@@ -76,7 +76,7 @@ class Window(QMainWindow):
 
         for i, (item_name, components) in enumerate(market_names["items"].items()):
             item_prices = market_data[item_name]
-            set_repr = instance.config["calc_sell_repr"](item_prices["set"]["sell"]) #calc_sell_repr(item_prices["set"]["sell"])
+            set_repr = instance.config["calc_sell_repr"](item_prices["set"]) #calc_sell_repr(item_prices["set"]["sell"])
             
             comp_sell_repr = instance.config["calc_component_repr"](item_prices["components"], components, "sell") # calc_comp_repr(item_prices["components"], components, "sell")
             comp_buy_repr = instance.config["calc_component_repr"](item_prices["components"], components, "buy") #calc_comp_repr(item_prices["components"], components, "buy")

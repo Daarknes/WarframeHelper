@@ -14,6 +14,7 @@ import win32gui
 from relicrewards import instance, warframe_ocr
 from core import wfmarket, constants
 from PyQt5.Qt import Qt
+import json
 
 
 price_quantile = 0.3
@@ -81,6 +82,11 @@ class KeyboardThread(QThread):
     textSignal = QtCore.pyqtSignal(int, str)
     paletteSignal = QtCore.pyqtSignal(int, bool)
     
+    def __init__(self, parent):
+        QThread.__init__(self, parent)
+        with open(constants.OCR_DUCATES_LOC, "r") as f:
+            self.ducate_data = json.load(f)
+    
     def run(self):
         while True:
             keyboard.wait(instance.config["HOTKEY"])
@@ -121,7 +127,8 @@ class KeyboardThread(QThread):
             offset = 1 if len(item_names) <= 2 else 0
             for i in range(4):
                 if 0 <= i-offset < len(item_names):
-                    text = item_names[i - offset] + "\n\n"
+                    item_name = item_names[i - offset]
+                    text = item_name + "\nDucats: " + (str(self.ducate_data[item_name]) if item_name in self.ducate_data else "-") + "\n\n"
                     prices = item_prices[item_names[i - offset]]
                     
                     if prices is None:
@@ -134,7 +141,7 @@ class KeyboardThread(QThread):
                             best_quantile = quantile
                             bestLabel = i
 
-                        num_lines = min(len(prices), 45)
+                        num_lines = min(len(prices), 40)
                         text += "\n".join(map(str, prices[:num_lines]))
                 else:
                     text = " - "

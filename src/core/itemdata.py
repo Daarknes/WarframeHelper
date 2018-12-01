@@ -16,6 +16,8 @@ warframe_parts = ["CHASSIS", "SYSTEMS", "NEUROPTICS"]
 # start with the forma blueprint
 ocr_items = {"FORMA BLUEPRINT"}
 
+ocr_ducats = {}
+
 #=========================
 # market stuff
 #=========================
@@ -56,8 +58,12 @@ def process_item(item):
         # replace special characters (market)
         for key, value in special_map.items():
             market_component_name = market_component_name.replace(key, value)
-             
-        ocr_items.add(item["name"].upper() + " " + ocr_component_name)
+        
+        ocr_component_name = item["name"].upper() + " " + ocr_component_name
+        
+        ocr_items.add(ocr_component_name)
+        if "ducats" in component:
+            ocr_ducats[ocr_component_name] = component["ducats"]
         market_component_names.extend([market_component_name] * component["itemCount"])
 
 _special_mods = {
@@ -93,6 +99,8 @@ for entry in data:
 
 with open(constants.OCR_NAMES_LOC, "w") as f:
     json.dump(list(ocr_items), f, indent=4)
+with open(constants.OCR_DUCATES_LOC, "w") as f:
+    json.dump(ocr_ducats, f, indent=4)
 
 with open(constants.MARKET_NAMES_LOC, "w") as f:
     json.dump(market_data, f, indent=4)
