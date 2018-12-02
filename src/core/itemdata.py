@@ -10,9 +10,6 @@ with open(constants.RES_LOC + "raw_item_data.json", "r", encoding="utf-8") as f:
 #==========================
 # ocr stuff
 #==========================
-# the game apends 'Blueprint' after each warframe part -> adjust data
-warframe_parts = ["CHASSIS", "SYSTEMS", "NEUROPTICS"]
-
 # start with the forma blueprint
 ocr_items = {"FORMA BLUEPRINT"}
 
@@ -53,7 +50,7 @@ def process_item(item):
         market_component_name = component["name"].replace(" ", "_").lower()
         
         # append 'BLUEPRINT' when the part is one of the warframe parts (ocr)
-        if ocr_component_name in warframe_parts:
+        if item["category"] == "Warframes" and ocr_component_name != "BLUEPRINT":
             ocr_component_name += " BLUEPRINT"
         # replace special characters (market)
         for key, value in special_map.items():

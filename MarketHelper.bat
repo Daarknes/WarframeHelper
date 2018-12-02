@@ -4,4 +4,7 @@ cd src\
 set PYTHONPATH=%cd%
 python market\main.py
 endlocal
-pause
+
+IF not %ERRORLEVEL% == 0 (
+	pause
+)
