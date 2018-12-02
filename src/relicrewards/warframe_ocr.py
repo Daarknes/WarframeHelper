@@ -214,9 +214,7 @@ def get_item_names(screenshot):
 #             plt.imshow(tess_image, cmap="gray")
 #             plt.show()
         
-        item_names = _executor.map(pytesseract.image_to_string, tess_images)
-        item_names = _executor.map(_adjust_to_database, item_names)
-   
+        item_names = _executor.map(_image_to_string, tess_images)
         return list(item_names)
     except Exception:
         print("[WF OCR] Error:\n", traceback.print_exc(file=sys.stdout))
@@ -226,13 +224,15 @@ def get_item_names(screenshot):
 with open(constants.OCR_NAMES_LOC, "r", encoding="utf-8") as f:
     item_database = json.load(f)
 
-#@benchmark 
-def _adjust_to_database(name):
+def _image_to_string(tess_image):
+    item_name = pytesseract.image_to_string(tess_image)
+    
+    # adjust to database
     lmin = 1e12
-    best = name
+    best = item_name
 
     for db_name in item_database:
-        ldist = levenshtein_distance(name, db_name, costs=(2, 2, 1))
+        ldist = levenshtein_distance(item_name, db_name, costs=(2, 2, 1))
         if ldist < lmin:
             lmin = ldist
             best = db_name
@@ -240,12 +240,11 @@ def _adjust_to_database(name):
         if ldist == 0:
             break
     
-    if lmin > len(name):
-        print("[WF OCR] '{}' is too far away from database (best match is '{}')".format(name, best))
+    if lmin > 4:
+        print("[WF OCR] '{}' is too far away from database (best match is '{}')".format(item_name, best))
         return "ERROR"
     else:
         return best
-    
 
 def levenshtein_distance(s, t, costs=(1, 1, 1)):
     """ 
@@ -261,9 +260,8 @@ def levenshtein_distance(s, t, costs=(1, 1, 1)):
     cols = len(t)+1
     deletes, inserts, substitutes = costs
     
-    
     # For all i and j, dist[i,j] will contain the Levenshtein distance between the first i characters of s and the first j characters of t
-    dist = [[0 for x in range(cols)] for x in range(rows)]
+    dist = [[0 for _ in range(cols)] for _ in range(rows)]
     # source prefixes can be transformed into empty strings 
     # by deletions:
     for row in range(1, rows):

@@ -13,30 +13,33 @@ from market import instance
 config = Config()
 
 section_funcs = config.addSection("Functions")
-section_funcs.addEntry("calc_buy_repr", FunctionBlock(r'''if not prices:
-    return None
+section_funcs.addEntry("calc_buy_repr", FunctionBlock(r'''if not prices["buy"]:
+    return calc_sell_repr(prices) * 3 // 4
 else:
-    # for buying only include the cheapest 10%
-    n = int(len(prices) * 0.1 + 0.95)
-    return sum(prices[:n]) // n''', "prices"), "calculates a buy-price-representative from price-data for a single component")
+    # for buying only include the most expensive 10%
+    n = int(len(prices["buy"]) * 0.1 + 0.95)
+    return sum(prices["buy"][:n]) // n''', "prices"), "calculates a buy-price-representative from price-data for a single component")
 
-section_funcs.addEntry("calc_sell_repr", FunctionBlock(r'''if not prices:
+section_funcs.addEntry("calc_sell_repr", FunctionBlock(r'''if not prices["sell"]:
     return None
 else:
     # take 0.3 quantile for selling representative
-    return prices[int(0.3 * len(prices))]''', "prices"), "calculates a sell-price-representative from price-data for a single component")
+    return prices["sell"][int(0.3 * len(prices["sell"]))]''', "prices"), "calculates a sell-price-representative from price-data for a single component")
 
 section_funcs.addEntry("calc_component_repr", FunctionBlock(r'''comp_repr = 0
 for comp_name in component_names:
     if prices[comp_name] is None:
         return None
-    comp_prices = prices[comp_name][order_type]
+    
+    if order_type == "buy":
+        price_repr = calc_buy_repr(prices[comp_name])
+    else:
+        price_repr = calc_sell_repr(prices[comp_name])
 
-    buy_repr = calc_buy_repr(comp_prices)
-    if buy_repr is None:
+    if price_repr is None:
         return None
 
-    comp_repr += buy_repr
+    comp_repr += price_repr
 return comp_repr''', "prices, component_names, order_type"), "calculates a buy-price-representative for a set of components from price-data")
 
 config.build()

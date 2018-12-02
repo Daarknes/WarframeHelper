@@ -27,9 +27,9 @@ CAT_MODS = "mods"
 _config = Config()
 
 _section_market = _config.addSection("Warframe Market")
-_section_market.addEntry("MAX_CONNECTIONS", 100, "The maximum number of simultaneous threads for http-requests (DEFAULT: 100)")
-_section_market.addEntry("MAX_ORDER_AGE", 12, "only include orders of players that are either in-game, or that have been updated in the last X hours (DEFAULT: 12)")
-_section_market.addEntry("MAX_UPDATE_AGE", 24, "The local market data (the prices) gets updated after this amount of hours (DEFAULT: 24)")
+_section_market.addEntry("MAX_CONNECTIONS", 100, "The maximum number of simultaneous threads for http-requests")
+_section_market.addEntry("MAX_ORDER_AGE", 8, "only include orders of players that are either in-game, or that have been updated in the last X hours")
+_section_market.addEntry("MAX_UPDATE_AGE", 24, "The local market data (the prices) gets updated after this amount of hours")
 
 _config.build()
 _config.loadAndUpdate(os.path.join(constants.CONFIG_LOC, "warframemarket.cfg"))

@@ -13,8 +13,8 @@ section_ocr = _config.addSection("OCR")
 section_ocr.addEntry("TESSERACT_PATH", r"C:\Program Files\Tesseract\tesseract.exe", "Path to your tesseract.exe")
 
 section_gui = _config.addSection("GUI")
-section_gui.addEntry("HOTKEY", "alt+m", "The hotkey to press (DEFAULT: 'alt+m')")
-section_gui.addEntry("save_screenshot", True, "Saves the screenshot to the 'images/'-folder when the hotkey is pressed (debug) (DEFAULT: True)")
+section_gui.addEntry("HOTKEY", "alt+m", "The hotkey to press")
+section_gui.addEntry("save_screenshot", True, "Saves the screenshot to the 'images/'-folder when the hotkey is pressed (debug)")
 
 _config.build()
 _config.loadAndUpdate(constants.CONFIG_LOC + "relicrewardhelper.cfg")

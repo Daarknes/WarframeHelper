@@ -138,6 +138,8 @@ class _ConfigSection():
     def addEntry(self, key, value, comment):
         if isinstance(value, FunctionBlock):
             comment += " (PARAMS: " + ", ".join(value._params) + ")"
+        else:
+            comment += " (DEFAULT: " + str(value) + ")"
         self.entries.append(_ConfigEntry(key, value, comment))
 
 class _ConfigEntry():
