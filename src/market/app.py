@@ -9,41 +9,11 @@ from core import constants, wfmarket
 from market import instance
 
 
-def calc_sell_repr(prices):
-    if not prices:
-        return None
-    else:
-        # take 0.3 quantile for selling representative
-        return prices[int(0.3 * len(prices))]
-
-def calc_buy_repr(prices):
-    if not prices:
-        return None
-    else:
-        # for buying only include the cheapest 4
-        return sum(prices[:10]) // len(prices[:10])
-
 def calc_profit(sell_price, buy_price):
     if not sell_price or not buy_price:
         return None
     else:
         return sell_price - buy_price
-
-def calc_comp_repr(component_prices, components, order_type):
-    comp_repr = 0
-
-    for comp_name in components:
-        if component_prices[comp_name] is None:
-            return None
-        comp_prices = component_prices[comp_name][order_type]
-
-        buy_repr = calc_buy_repr(comp_prices)
-        if buy_repr is None:
-            return None
-
-        comp_repr += buy_repr
-    
-    return comp_repr
 
 
 class Window(QMainWindow):
@@ -118,9 +88,9 @@ class Window(QMainWindow):
             mod_prices = market_data[mod_name]
             if mod_prices is None:
                 continue
-
-            buy_repr = calc_buy_repr(mod_prices["buy"])
-            sell_repr = calc_sell_repr(mod_prices["sell"])
+            
+            buy_repr = instance.config["calc_buy_repr"](mod_prices)
+            sell_repr = instance.config["calc_sell_repr"](mod_prices)
 
             table.setItem(i, 0, QTableWidgetItem(" ".join(mod_name.split("_"))))
 

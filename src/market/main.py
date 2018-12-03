@@ -14,7 +14,8 @@ config = Config()
 
 section_funcs = config.addSection("Functions")
 section_funcs.addEntry("calc_buy_repr", FunctionBlock(r'''if not prices["buy"]:
-    return calc_sell_repr(prices) * 3 // 4
+    sell_repr = calc_sell_repr(prices)
+    return sell_repr * 3 // 4 if sell_repr else None
 else:
     # for buying only include the most expensive 10%
     n = int(len(prices["buy"]) * 0.1 + 0.95)
@@ -23,8 +24,9 @@ else:
 section_funcs.addEntry("calc_sell_repr", FunctionBlock(r'''if not prices["sell"]:
     return None
 else:
-    # take 0.3 quantile for selling representative
-    return prices["sell"][int(0.3 * len(prices["sell"]))]''', "prices"), "calculates a sell-price-representative from price-data for a single component")
+    # take 0.1 quantile for selling representative
+    n = int(0.1 * len(prices["sell"]))
+    return prices["sell"][n]''', "prices"), "calculates a sell-price-representative from price-data for a single component")
 
 section_funcs.addEntry("calc_component_repr", FunctionBlock(r'''comp_repr = 0
 for comp_name in component_names:
