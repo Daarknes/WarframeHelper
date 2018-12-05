@@ -16,6 +16,8 @@ from core import constants
 # import matplotlib.pyplot as plt
 
 
+if not os.path.exists(instance.config["TESSERACT_PATH"]):
+    raise Exception("No tesseract.exe at '" + instance.config["TESSERACT_PATH"] + "'")
 pytesseract.pytesseract.tesseract_cmd = instance.config["TESSERACT_PATH"]
 
 # threshhold for the checkbox pattern matching which evaluates the number of players
@@ -193,6 +195,9 @@ def get_item_names(screenshot):
     converts a screenshot to valid warframe item names.
     @param screenshot: the screenshot as a PIL-Image or numpy-array
     """
+    if _executor is None:
+        raise Exception("warframe_ocr.init() was never called")
+
     try:
         screenshot = np.asarray(screenshot)
         tess_images = []
@@ -224,22 +229,22 @@ def get_item_names(screenshot):
 with open(constants.OCR_NAMES_LOC, "r", encoding="utf-8") as f:
     item_database = json.load(f)
 
-def _image_to_string(tess_image):
+def _image_to_string(tess_image):    
     item_name = pytesseract.image_to_string(tess_image)
-    
+     
     # adjust to database
     lmin = 1e12
     best = item_name
-
+ 
     for db_name in item_database:
         ldist = levenshtein_distance(item_name, db_name, costs=(2, 2, 1))
         if ldist < lmin:
             lmin = ldist
             best = db_name
-
+ 
         if ldist == 0:
             break
-    
+     
     if lmin > 4:
         print("[WF OCR] '{}' is too far away from database (best match is '{}')".format(item_name, best))
         return "ERROR"

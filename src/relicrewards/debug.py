@@ -4,9 +4,12 @@ import numpy as np
 import cProfile
 import pstats
 
+from relicrewards import instance
+_config = {"TESSERACT_PATH": r"E:\Tesseract\tesseract.exe"}
+instance.setConfig(_config)
+
 if __name__ == "__main__":
-    import warframe_ocr
-    import warframe_ocr_old
+    from relicrewards import warframe_ocr
     from PIL import Image
 
 np.set_printoptions(threshold=1e10, linewidth=500)
@@ -56,49 +59,24 @@ def debug_market(item_names):
 #             print(sum(prices) / len(prices))
 
 
-def debug_ocr_old():
-    def iteration(image_path):
-        image = np.asarray(Image.open(image_path).convert("RGB"))
-        print(warframe_ocr_old.get_item_names(image))
-        
-    warframe_ocr_old.init()
-
-    folder_1440p_borderless = os.path.join("..", "images")
-    
-    for path in os.listdir(folder_1440p_borderless)[:10]:
-        iteration(os.path.join(folder_1440p_borderless, path))
-        
-    warframe_ocr_old.cleanup()
-
-
 if __name__ == "__main__":
-#     warframe_ocr.init()
+    warframe_ocr.init()
 #     prof = cProfile.Profile()
 #     prof.enable()
-#     debug_ocr_single(os.path.join("..", "images_1080p", "08-11-2018_19-35-00.png"))
+    debug_ocr_single(os.path.join("..", "images_1080p", "08-11-2018_19-35-00.png"))
 #     debug_ocr_single(os.path.join("..", "images", "07-11-2018_22-25-00.png"))
 #     debug_ocr_single(os.path.join("..", "images", "07-11-2018_22-13-31.png"))
 #     prof.disable()
-#     warframe_ocr.cleanup()
-    
-#     a = np.array([[[255, 127, 127]]])
-#     print(a)
-#     print(warframe_ocr.rgb_to_hsv(a))
-    
-    prof = cProfile.Profile()
-    prof.enable()
-    debug_ocr()
-#     debug_ocr_old()
-    prof.disable()
+    warframe_ocr.cleanup()
     
 #     prof = cProfile.Profile()
 #     prof.enable()
 #     debug_market(['EUPHONA PRIME BLUEPRINT', 'KRONEN PRIME BLUEPRINT', 'ZEPHYR PRIME CHASSIS BLUEPRINT', 'EUPHONA PRIME BLUEPRINT'])
 #     prof.disable()
 
-    prof.dump_stats("perftest.cprof")
-    stats = pstats.Stats("perftest.cprof")
-    stats.sort_stats("time").print_stats(40)
+#     prof.dump_stats("perftest.cprof")
+#     stats = pstats.Stats("perftest.cprof")
+#     stats.sort_stats("time").print_stats(40)
     
 #     stats = pstats.Stats("perftest_old.cprof")
 #     stats.sort_stats("time").print_stats(40)
