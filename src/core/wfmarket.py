@@ -160,12 +160,14 @@ def _request_prices(market_item_name):
             response = requests.get(_address.format(market_item_name))
             if response.status_code == requests.codes["not_found"]:
                 return None
-            elif response.status_code == requests.codes["service_unavailable"]:
-                # try again in 1s
-                time.sleep(1)
-                continue
-            else:
+            elif response.status_code == requests.codes["ok"]:
                 break
+#             elif response.status_code == requests.codes["service_unavailable"]:
+            else:
+                print(market_item_name + " needs retry")
+                # try again in 1s
+                time.sleep(1.0)
+                continue
 
         data = json.loads(response.content.decode("utf-8"))
         current_date = datetime.now()
