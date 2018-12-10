@@ -20,9 +20,6 @@ _special_map = {
     "-": "_"
 }
 
-CAT_ITEMS = "items"
-CAT_MODS = "mods"
-
 # _config
 _config = Config()
 
@@ -34,8 +31,9 @@ _section_market.addEntry("MAX_UPDATE_AGE", 24, "The local market data (the price
 _config.build()
 _config.loadAndUpdate(os.path.join(constants.CONFIG_LOC, "warframemarket.cfg"))
 
-def _convert_to_market_name(raw_item_name):
-    words = raw_item_name.lower().split()
+
+def _convert_to_market_name(ocr_item_name):
+    words = ocr_item_name.lower().split()
     if [word for word in words if word in _warframe_parts]:
         words = words[:-1]
     market_name = "_".join(words)
@@ -45,20 +43,23 @@ def _convert_to_market_name(raw_item_name):
 
     return market_name
 
+CAT_ITEMS = "items"
+CAT_MODS = "mods"
+CAT_RELICS = "relics"
+
 class _Info():
-    def __init__(self, name, category, bonus=None):
+    def __init__(self, name, categoty):
         self.name = name
-        self.category = category
-        self.bonus = bonus
+        self.category = categoty
     
     def __str__(self):
-        return self.name + ("" if self.bonus is None else "_" + self.bonus)
-
+        return self.name
+    
     def __repr__(self):
-        return "[{}] {}".format(self.category, self.name) + ("" if self.bonus is None else "_" + self.bonus)
+        return "[{}] {}".format(self.category, self.name)
 
 def load():
-    global _name_to_info, _market_prices
+    global _market_prices
 
     if not os.path.exists(constants.MARKET_PRICES_LOC):
         update()
@@ -72,53 +73,63 @@ def load():
         if (delta.days * 24 + delta.seconds // 3600) > _config["MAX_UPDATE_AGE"]:
             update()
         else:
-            for item_name, item_data in _market_prices["items"].items():
-                info = _Info(item_name, CAT_ITEMS, "set")
-                _name_to_info[str(info)] = info
-                for component_name in item_data["components"].keys():
-                    info = _Info(item_name, CAT_ITEMS, component_name)
-                    _name_to_info[str(info)] = info
-            
-            for mod_name in _market_prices["mods"].keys():
-                info = _Info(mod_name, CAT_MODS)
-                _name_to_info[str(info)] = info
-
             print("[WFMarket] Market data successfully loaded (last update was on {}).".format(datetime.strftime(update_date, "%d.%m.%Y-%H:%M:%S")))
     
     global _loaded
     _loaded = True
 
 def update():
-    global _name_to_info, _market_prices
+    global _market_prices
     
     print("[WFMarket] updating market prices. This may take a while.")
     with open(constants.MARKET_NAMES_LOC, "r", encoding="utf-8") as f:
         market_names = json.load(f)
 
+# debug
+#     market_names = {
+#         "items": {
+#             "akbolto_prime": [
+#                 "barrel",
+#                 "barrel",
+#                 "blueprint",
+#                 "link",
+#                 "receiver",
+#                 "receiver"]
+#         },
+#         "mods": [
+#             "abating_link"
+#         ],
+#         "relics": {
+#             "lith_c2_intact": [
+#                 [
+#                     "akbolto_prime_barrel",
+#                     0.11
+#                 ]
+#             ]
+#         }
+#     }
+
     _market_prices = {
         "last_update": datetime.now().strftime("%d-%m-%Y_%H-%M-%S"),
-        "items": {},
-        "mods": {}
+        CAT_ITEMS: {},
+        CAT_MODS: {},
+        CAT_RELICS: {}
     }
     
     infos =  []
-
-    for item_name, components in market_names["items"].items():
-        info = _Info(item_name, CAT_ITEMS, "set")
-        _name_to_info[str(info)] = info
-        infos.append(info)
+    for item_name, components in market_names[CAT_ITEMS].items():
+        infos.append(_Info(item_name + "_set", CAT_ITEMS))
 
         for comp_name in set(components):
             # only add components, not separate items (this is not a part)
-            if comp_name not in market_names["items"]:
-                info = _Info(item_name, CAT_ITEMS, comp_name)
-                _name_to_info[str(info)] = info
-                infos.append(info)
+            if comp_name not in market_names[CAT_ITEMS]:
+                infos.append(_Info(item_name + "_" + comp_name, CAT_ITEMS))
 
-    for mod_name in market_names["mods"]:
-        info = _Info(mod_name, CAT_MODS)
-        _name_to_info[str(info)] = info
-        infos.append(info)
+    for mod_name in market_names[CAT_MODS]:
+        infos.append(_Info(mod_name, CAT_MODS))
+    
+    for relic_name in market_names[CAT_RELICS].keys():
+        infos.append(_Info(relic_name, CAT_RELICS))
     
     i = 0
     progress = ProgressBar(40, len(infos))
@@ -134,20 +145,7 @@ def update():
         prices = ex.map(request_prices, infos)
 
     for info, prices in zip(infos, prices):
-        if info.category == CAT_ITEMS:
-            # when the item is not yet present, add an entry in the dict
-            if info.name not in _market_prices["items"]:
-                _market_prices["items"][info.name] = {}
-            
-            item_data = _market_prices["items"][info.name]
-            if info.bonus == "set":
-                item_data["set"] = prices
-            else:
-                if "components" not in item_data:
-                    item_data["components"] = {}
-                item_data["components"][info.bonus] = prices
-        elif info.category == CAT_MODS:
-            _market_prices["mods"][info.name] = prices
+        _market_prices[info.category][info.name] = prices
     
     with open(constants.MARKET_PRICES_LOC, "w") as f:
         json.dump(_market_prices, f, indent=2)
@@ -162,7 +160,6 @@ def _request_prices(market_item_name):
                 return None
             elif response.status_code == requests.codes["ok"]:
                 break
-#             elif response.status_code == requests.codes["service_unavailable"]:
             else:
                 print(market_item_name + " needs retry")
                 # try again in 1s
@@ -206,14 +203,7 @@ def item_names_to_prices_map(ocr_item_names):
             name_to_prices[item_name] = []
         else:
             market_name = _convert_to_market_name(item_name)
-            info = _name_to_info[market_name]
-            if info.category == CAT_ITEMS:
-                if info.bonus == "set":
-                    name_to_prices[item_name] = _market_prices["items"][info.name]["set"]["sell"]
-                else:                
-                    name_to_prices[item_name] = _market_prices["items"][info.name]["components"][info.bonus]["sell"]
-            elif info.category == CAT_MODS:
-                name_to_prices[item_name] = _market_prices["mods"][info.name]
+            name_to_prices[item_name] = _market_prices["items"][market_name]["sell"]
 
     return name_to_prices
 
@@ -224,5 +214,4 @@ def get_all(category):
     return _market_prices[category]
 
 _loaded = False
-_name_to_info = {}
 _market_prices = {}

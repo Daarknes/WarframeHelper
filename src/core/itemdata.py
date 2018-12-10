@@ -24,7 +24,7 @@ special_map = {
     "-": "_"
 }
 
-market_data = {"items": {}, "mods": []}
+market_data = {"items": {}, "mods": [], "relics": {}}
 
 
 def get_market_name(entry):
@@ -33,6 +33,8 @@ def get_market_name(entry):
         market_name = market_name.replace(key, value)
     return market_name
 
+
+_relic_types = ("Intact", "Radiant")
 def process_item(item):
     if not ("Prime" in item["name"] and "components" in item):
         return
@@ -62,6 +64,19 @@ def process_item(item):
         if "ducats" in component:
             ocr_ducats[ocr_component_name] = component["ducats"]
         market_component_names.extend([market_component_name] * component["itemCount"])
+        
+        # relics
+        if "drops" in component:
+            for drop in component["drops"]:
+                if drop["type"] != "Relics" or drop["location"].split(" ")[-1] not in _relic_types:
+                    continue
+                
+                relic_name = drop["location"].replace(" ", "_").lower()
+                if relic_name not in market_data["relics"]:
+                    market_data["relics"][relic_name] = []
+                    
+                market_data["relics"][relic_name].append((market_name + "_" + market_component_name, drop["chance"]))
+    
 
 _special_mods = {
     "ambush_optics": "ambush_optics_(rubico)",
@@ -76,7 +91,7 @@ _special_mods = {
 }
 def process_mod(mod):
     # ignore rivens
-    if not entry["tradable"] or "Riven" in mod["name"].split(" "):
+    if not mod["tradable"] or "Riven" in mod["name"].split(" "):
         return
 
     mod_name = get_market_name(mod)

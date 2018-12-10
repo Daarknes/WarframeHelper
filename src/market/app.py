@@ -45,11 +45,12 @@ class Window(QMainWindow):
         table.verticalHeader().hide()
 
         for i, (item_name, components) in enumerate(market_names["items"].items()):
-            item_prices = market_data[item_name]
-            set_repr = instance.config["calc_sell_repr"](item_prices["set"]) #calc_sell_repr(item_prices["set"]["sell"])
+            set_repr = instance.config["calc_sell_repr"](market_data[item_name + "_set"])
             
-            comp_sell_repr = instance.config["calc_component_repr"](item_prices["components"], components, "sell") # calc_comp_repr(item_prices["components"], components, "sell")
-            comp_buy_repr = instance.config["calc_component_repr"](item_prices["components"], components, "buy") #calc_comp_repr(item_prices["components"], components, "buy")
+            component_prices = [market_data[item_name + "_" + comp_name] for comp_name in components]
+            
+            comp_sell_repr = instance.config["calc_component_repr"](component_prices, "sell")
+            comp_buy_repr = instance.config["calc_component_repr"](component_prices, "buy")
 
             
             table.setItem(i, 0, QTableWidgetItem(" ".join(item_name.split("_"))))

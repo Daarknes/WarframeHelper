@@ -29,20 +29,20 @@ else:
     return prices["sell"][n]''', "prices"), "calculates a sell-price-representative from price-data for a single component")
 
 section_funcs.addEntry("calc_component_repr", FunctionBlock(r'''comp_repr = 0
-for comp_name in component_names:
-    if prices[comp_name] is None:
+for comp_prices in prices:
+    if comp_prices is None:
         return None
     
     if order_type == "buy":
-        price_repr = calc_buy_repr(prices[comp_name])
+        price_repr = calc_buy_repr(comp_prices)
     else:
-        price_repr = calc_sell_repr(prices[comp_name])
+        price_repr = calc_sell_repr(comp_prices)
 
     if price_repr is None:
         return None
 
     comp_repr += price_repr
-return comp_repr''', "prices, component_names, order_type"), "calculates a buy-price-representative for a set of components from price-data")
+return comp_repr''', "prices, order_type"), "calculates a buy-price-representative for a set of components from price-data")
 
 config.build()
 config.loadAndUpdate(os.path.join(constants.CONFIG_LOC, "markethelper.cfg"))
