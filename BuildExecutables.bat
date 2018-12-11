@@ -39,7 +39,9 @@ REM Move the folder to its final position and rename it
 move dist Executables
 rename Executables\dist RelicHelper
 
+REM Delete some build artifacts
 rmdir /s /q build
+del /q main.spec 
 
 echo ===============================
 echo Build is done. Compressing now!

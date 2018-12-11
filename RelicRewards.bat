@@ -2,7 +2,7 @@
 setlocal
 cd src\
 set PYTHONPATH=%cd%
-python relicrewards\main.py
+py -3 relicrewards\main.py
 endlocal
 
 IF not %ERRORLEVEL% == 0 (

@@ -194,7 +194,7 @@ class Window(QMainWindow):
         table = QTableWidget()
         table.setColumnCount(7)
         table.setRowCount(len(relics))
-        table.setHorizontalHeaderLabels(["Name", "Price Intact", "Potential Profit Intact", "Profit 4 Pers Rad from Intact", "Price Radiant", "Potential Profit Radiant", "Profit 4 Pers Rad from Radiant"])
+        table.setHorizontalHeaderLabels(["Name", "Price Intact", "Potential Profit Intact", "Profit per person (int)", "Price Radiant", "Potential Profit Radiant", "Profit per person (rad)"])
         table.verticalHeader().hide()
 
         #code.interact(local=locals())   
@@ -202,31 +202,37 @@ class Window(QMainWindow):
             
             table.setItem(i, 0, QTableWidgetItem(" ".join(relic_name.split("_"))))
             
+            cleaned_int_price = int_price
+            if (int_price <= 0 or int_price > 100000):
+                cleaned_int_price = "-"
             item = QTableWidgetItem()
-            item.setData(Qt.EditRole, int_price)
+            item.setData(Qt.EditRole, cleaned_int_price)
             table.setItem(i, 1, item)
             
             item = QTableWidgetItem()
             item.setData(Qt.EditRole, int_income)
             table.setItem(i, 2, item)
             
-            price_value = (rad_income * 4) - int_price
-            if (price_value < 0):
+            price_value = ((rad_income * 4) - int_price) / 4
+            if (price_value <= 0):
                 price_value = "-"
             item = QTableWidgetItem()
             item.setData(Qt.EditRole, price_value)
             table.setItem(i, 3, item)
             
+            cleaned_rad_price = rad_price
+            if (rad_price <= 0 or rad_price > 100000):
+                cleaned_rad_price = "-"
             item = QTableWidgetItem()
-            item.setData(Qt.EditRole, rad_price)
+            item.setData(Qt.EditRole, cleaned_rad_price)
             table.setItem(i, 4, item)
             
             item = QTableWidgetItem()
             item.setData(Qt.EditRole, rad_income)
             table.setItem(i, 5, item)
             
-            price_value = (rad_income * 4) - rad_price
-            if (price_value < 0):
+            price_value = ((rad_income * 4) - rad_price) / 4
+            if (price_value <= 0):
                 price_value = "-"
             item = QTableWidgetItem()
             item.setData(Qt.EditRole, price_value)
