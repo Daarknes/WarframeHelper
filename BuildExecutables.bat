@@ -12,7 +12,6 @@ pyinstaller ./src/market/main.py
 
 REM Copy the needed files to the correct place
 xcopy /q res dist\res\
-xcopy /q config dist\config\
 xcopy /q BuildEssentials\MarketHelper.bat dist\
 
 REM Delete the downloaded market prices file
@@ -31,7 +30,6 @@ pyinstaller ./src/relicrewards/main.py
 
 REM Copy the needed files to the correct place
 xcopy /q res dist\res\
-xcopy /q config dist\config\
 xcopy /q BuildEssentials\RelicHelper.bat dist\
 
 REM Delete the downloaded market prices file
@@ -42,3 +40,13 @@ move dist Executables
 rename Executables\dist RelicHelper
 
 rmdir /s /q build
+
+echo ===============================
+echo Build is done. Compressing now!
+echo ===============================
+
+REM Compress the resulting folder
+7z a -t7z -mx=9 -md=768m -m0=lzma2 -aoa Executables.7z -r Executables\
+
+REM and delete the original, big folder
+rmdir /s /q Executables
