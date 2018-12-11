@@ -2,7 +2,7 @@
 setlocal
 cd src\
 set PYTHONPATH=%cd%
-python market\main.py
+py -3 market\main.py
 endlocal
 
 IF not %ERRORLEVEL% == 0 (
