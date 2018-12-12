@@ -116,6 +116,7 @@ def update():
         CAT_RELICS: {}
     }
     
+    # accumulate all market names to request them "simultaneously" (via Threading)
     infos =  []
     for item_name, components in market_names[CAT_ITEMS].items():
         infos.append(_Info(item_name + "_set", CAT_ITEMS))
@@ -131,6 +132,7 @@ def update():
     for relic_name in market_names[CAT_RELICS].keys():
         infos.append(_Info(relic_name, CAT_RELICS))
     
+    # helper method for requesting prices and updating the loading bar
     i = 0
     progress = ProgressBar(40, len(infos))
     def request_prices(info):
@@ -141,12 +143,14 @@ def update():
         progress.update(i)
         return prices
     
+    # "simultaneously" request the prices for all market names
     with ThreadPoolExecutor(max_workers=_config["MAX_CONNECTIONS"]) as ex:
         prices = ex.map(request_prices, infos)
-
+    # and put them into the data structure
     for info, prices in zip(infos, prices):
         _market_prices[info.category][info.name] = prices
     
+    # save the prices into a file
     with open(constants.MARKET_PRICES_LOC, "w") as f:
         json.dump(_market_prices, f, indent=2)
 
@@ -156,7 +160,13 @@ def _request_prices(market_item_name):
 #         print("[WFMarket] searching on '" + _address.format(market_item_name) + "' for orders.")
         while True:
             response = requests.get(_address.format(market_item_name))
-            if response.status_code == requests.codes["not_found"]:
+
+            if response is None:
+                print(market_item_name + " needs retry")
+                # try again in 1s
+                time.sleep(1.0)
+                continue
+            elif response.status_code == requests.codes["not_found"]:
                 return None
             elif response.status_code == requests.codes["ok"]:
                 break
@@ -191,10 +201,12 @@ def _request_prices(market_item_name):
         print(traceback.print_exc(file=sys.stdout))
         return None
 
-def item_names_to_prices_map(ocr_item_names):
+def _ensure_loaded():
     if not _loaded:
-        raise Exception("[WFMarket] not loaded, call wfmarket.load(max_update_age, max_order_age) first.")
+        raise Exception("[WFMarket] not loaded, call wfmarket.load() first.")
 
+def item_names_to_prices_map(ocr_item_names):
+    _ensure_loaded()
     name_to_prices = {}
     
     for item_name in set(ocr_item_names):
@@ -208,9 +220,7 @@ def item_names_to_prices_map(ocr_item_names):
     return name_to_prices
 
 def get_all(category):
-    if not _loaded:
-        raise Exception("[WFMarket] not loaded, call wfmarket.load(max_update_age, max_order_age) first.")
-
+    _ensure_loaded()
     return _market_prices[category]
 
 _loaded = False
