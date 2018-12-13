@@ -129,8 +129,9 @@ def update():
     for mod_name in market_names[CAT_MODS]:
         infos.append(_Info(mod_name, CAT_MODS))
     
-    for relic_name in market_names[CAT_RELICS].keys():
-        infos.append(_Info(relic_name, CAT_RELICS))
+    for relic_name, relic_types in market_names[CAT_RELICS].items():
+        for relic_type in relic_types.keys():
+            infos.append(_Info(relic_name + "_" + relic_type, CAT_RELICS))
     
     # helper method for requesting prices and updating the loading bar
     i = 0
