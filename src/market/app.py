@@ -119,6 +119,10 @@ class Window(QMainWindow):
 
     
     def createRelicTable(self, market_names):
+        
+        cutoff_price = 7
+        
+        
         relic_data = wfmarket.get_all(wfmarket.CAT_RELICS)
         item_data = wfmarket.get_all(wfmarket.CAT_ITEMS)
         
@@ -129,6 +133,8 @@ class Window(QMainWindow):
         #2: radiant income
         #3: radiant price
         relics = defaultdict(list)
+        
+        code.interact(local=locals())
         
         for i, (relic_name, components) in enumerate(market_names["relics"].items()):
             
@@ -147,12 +153,12 @@ class Window(QMainWindow):
             if (buy_repr == None):
                 buy_repr = 9999999
             else:
-                invalid_flag = invalid_flag & False
+                invalid_flag = False
             
             if (sell_repr == None):
                 sell_repr = 9999999
             else:
-                invalid_flag = invalid_flag & False
+                invalid_flag = False
                 
             #best_relic_price = min(buy_repr, sell_repr)
             best_relic_price = sell_repr #a lot of people try to buy relics way too cheap
@@ -171,15 +177,18 @@ class Window(QMainWindow):
             
             #calculate the expected income for the current relic
             for (component_name, component_probability) in components:
-                current_price = item_data[component_name]
+                current_component = item_data[component_name]
             
-                if current_price is None:
+                if current_component is None:
                     continue
             
-                buy_repr = instance.config["calc_buy_repr"](current_price)
-                sell_repr = instance.config["calc_sell_repr"](current_price)
+                buy_repr = instance.config["calc_buy_repr"](current_component)
+                sell_repr = instance.config["calc_sell_repr"](current_component)
                 
                 best_item_price = max(buy_repr, sell_repr)
+                
+                if (best_item_price < cutoff_price):
+                    best_item_price = 0
                 
                 income = income + (best_item_price * component_probability)
             
@@ -200,7 +209,12 @@ class Window(QMainWindow):
         #code.interact(local=locals())   
         for i, (relic_name, (int_income, int_price, rad_income, rad_price)) in enumerate(relics.items()):
             
-            table.setItem(i, 0, QTableWidgetItem(" ".join(relic_name.split("_"))))
+            item = QTableWidgetItem(" ".join(relic_name.split("_")))
+            
+            #item = item.setToolTip('This is a tooltip message.')
+            
+            
+            table.setItem(i, 0, item)
             
             cleaned_int_price = int_price
             if (int_price <= 0 or int_price > 100000):
