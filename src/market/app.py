@@ -179,6 +179,7 @@ class Window(QMainWindow):
                 row[2*j+1] = best_relic_price
 
 
+            # TODO: make this prettier
             table.setItem(i, 0, QTableWidgetItem(" ".join(relic_name.split("_"))))
             
             item = QTableWidgetItem()

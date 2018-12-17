@@ -34,7 +34,7 @@ _config.loadAndUpdate(os.path.join(constants.CONFIG_LOC, "warframemarket.cfg"))
 
 def _convert_to_market_name(ocr_item_name):
     words = ocr_item_name.lower().split()
-    if [word for word in words if word in _warframe_parts]:
+    if [word for word in words[:-1] if word in _warframe_parts]:
         words = words[:-1]
     market_name = "_".join(words)
     
