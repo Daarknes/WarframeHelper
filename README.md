@@ -3,15 +3,18 @@ Collection of helpers for Warframe.
 
 ## General requirements:
 - Python 3.x
-- Numpy
-- PyQt5
+- Numpy:  
+  `pip install numpy`
+- PyQt5 (https://pypi.org/project/PyQt5/):  
+  `pip install PyQt5`
 
 
 ## RelicReward Helper
 Program for displaying the prices of items seen on the relic reward screen (currently Windows-only).
 
 ### Requirements:
-- PIL (Pillow)
+- PIL (Pillow):
+  `pip install Pillow`
 - Tesseract OCR, available here (for Windows): https://github.com/UB-Mannheim/tesseract/wiki
 - pytesseract (https://pypi.org/project/pytesseract/), available via pip:  
   `pip install pytesseract`
