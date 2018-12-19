@@ -232,6 +232,12 @@
             "neuroptics",
             "systems"
         ],
+        "mesa_prime": [
+            "blueprint",
+            "chassis",
+            "neuroptics",
+            "systems"
+        ],
         "mirage_prime": [
             "blueprint",
             "chassis",
@@ -454,6 +460,7 @@
         "antitoxin",
         "apex_predator",
         "arc_coil",
+        "arch_gun_ace",
         "argent_scourge",
         "argon_plating",
         "argon_scope",
@@ -529,6 +536,7 @@
         "cautious_shot",
         "celestial_nightfall",
         "chaos_sphere",
+        "charged_bullets",
         "charged_chamber",
         "charged_shell",
         "charm",
@@ -558,6 +566,7 @@
         "constitution",
         "contagion_cloud",
         "contagious_spread",
+        "contamination_casing",
         "continuity",
         "continuity",
         "continuous_misery",
@@ -579,6 +588,7 @@
         "crimson_dervish",
         "critical_deceleration",
         "critical_delay",
+        "critical_focus",
         "crossing_snakes",
         "crowd_dispersion",
         "crushing_ruin",
@@ -589,6 +599,7 @@
         "cutting_edge",
         "cyclone_kraken",
         "dead_eye",
+        "deadly_efficiency",
         "deadly_sequence",
         "deceptive_bond",
         "decisive_judgement",
@@ -684,6 +695,7 @@
         "firewalker",
         "flailing_branch",
         "flak_shot",
+        "flame_gland",
         "flame_repellent",
         "flash_accelerant",
         "flechette",
@@ -703,6 +715,7 @@
         "frail_momentum",
         "freeze_force",
         "frigid_blast",
+        "frost_jaw",
         "frostbite",
         "full_capacity",
         "full_contact",
@@ -782,6 +795,7 @@
         "hydraulic_crosshairs",
         "hydraulic_gauge",
         "hyperion_thrusters",
+        "hypothermic_shell",
         "hysterical_assault",
         "hysterical_fixation",
         "ice_spring",
@@ -855,6 +869,7 @@
         "maiming_strike",
         "malicious_raptor",
         "malignant_force",
+        "marked_target",
         "martial_fury",
         "master_thief",
         "maul",
@@ -981,8 +996,11 @@
         "primed_regen",
         "primed_rifle_ammo_mutation",
         "primed_shotgun_ammo_mutation",
+        "primed_shred",
         "primed_slip_magazine",
+        "primed_sure_footed",
         "primed_target_cracker",
+        "primed_vigor",
         "prism_guard",
         "prize_kill",
         "proboscis",
@@ -1036,6 +1054,7 @@
         "rending_wind",
         "repeater_clip",
         "repelling_bastille",
+        "resolute_focus",
         "resonance",
         "resonating_quake",
         "retribution",
@@ -1059,6 +1078,7 @@
         "rumbled",
         "rupture",
         "rush",
+        "sabot_rounds",
         "sacrifice",
         "sacrificial_pressure",
         "sacrificial_steel",
@@ -1070,7 +1090,6 @@
         "savagery",
         "savior_decoy",
         "sawtooth_clip",
-        "scan_lifeforms",
         "scan_matter",
         "scarlet_hurricane",
         "scattered_justice",
@@ -1111,6 +1130,7 @@
         "shield_overload",
         "shimmering_blight",
         "shock_absorbers",
+        "shock_collar",
         "shock_trooper",
         "shocking_speed",
         "shocking_touch",
@@ -1178,6 +1198,10 @@
         "stockpiled_blight",
         "stormbringer",
         "strafing_slide",
+        "strain_consume",
+        "strain_eruption",
+        "strain_fever",
+        "strain_infection",
         "streamline",
         "streamlined_form",
         "stretch",
@@ -1268,6 +1292,7 @@
         "venerdo_hoverdrive",
         "vengeful_revenant",
         "venom_dose",
+        "venom_teeth",
         "venomous_clip",
         "venomous_rise",
         "vermilion_storm",
@@ -1611,6 +1636,106 @@
                 [
                     "valkyr_prime_chassis",
                     0.1
+                ]
+            ]
+        },
+        "neo_z2": {
+            "intact": [
+                [
+                    "akbolto_prime_blueprint",
+                    0.25329999999999997
+                ],
+                [
+                    "braton_prime_stock",
+                    0.25329999999999997
+                ],
+                [
+                    "lex_prime_blueprint",
+                    0.25329999999999997
+                ],
+                [
+                    "mesa_prime_blueprint",
+                    0.11
+                ],
+                [
+                    "pyrana_prime_receiver",
+                    0.11
+                ],
+                [
+                    "zephyr_prime_blueprint",
+                    0.02
+                ]
+            ],
+            "radiant": [
+                [
+                    "akbolto_prime_blueprint",
+                    0.16670000000000001
+                ],
+                [
+                    "braton_prime_stock",
+                    0.16670000000000001
+                ],
+                [
+                    "lex_prime_blueprint",
+                    0.16670000000000001
+                ],
+                [
+                    "mesa_prime_blueprint",
+                    0.2
+                ],
+                [
+                    "pyrana_prime_receiver",
+                    0.2
+                ],
+                [
+                    "zephyr_prime_blueprint",
+                    0.1
+                ]
+            ]
+        },
+        "axi_h4": {
+            "intact": [
+                [
+                    "akbolto_prime_link",
+                    0.11
+                ],
+                [
+                    "hydroid_prime_systems",
+                    0.02
+                ],
+                [
+                    "mesa_prime_chassis",
+                    0.2533
+                ],
+                [
+                    "mirage_prime_chassis",
+                    0.25329999999999997
+                ],
+                [
+                    "paris_prime_upper_limb",
+                    0.25329999999999997
+                ]
+            ],
+            "radiant": [
+                [
+                    "akbolto_prime_link",
+                    0.2
+                ],
+                [
+                    "hydroid_prime_systems",
+                    0.1
+                ],
+                [
+                    "mesa_prime_chassis",
+                    0.1667
+                ],
+                [
+                    "mirage_prime_chassis",
+                    0.16670000000000001
+                ],
+                [
+                    "paris_prime_upper_limb",
+                    0.16670000000000001
                 ]
             ]
         },
@@ -2233,6 +2358,52 @@
                 [
                     "valkyr_prime_blueprint",
                     0.16670000000000001
+                ]
+            ]
+        },
+        "neo_m2": {
+            "intact": [
+                [
+                    "akbronco_prime_blueprint",
+                    0.25329999999999997
+                ],
+                [
+                    "bronco_prime_barrel",
+                    0.11
+                ],
+                [
+                    "burston_prime_stock",
+                    0.25329999999999997
+                ],
+                [
+                    "limbo_prime_blueprint",
+                    0.11
+                ],
+                [
+                    "mesa_prime_systems",
+                    0.02
+                ]
+            ],
+            "radiant": [
+                [
+                    "akbronco_prime_blueprint",
+                    0.16670000000000001
+                ],
+                [
+                    "bronco_prime_barrel",
+                    0.2
+                ],
+                [
+                    "burston_prime_stock",
+                    0.16670000000000001
+                ],
+                [
+                    "limbo_prime_blueprint",
+                    0.2
+                ],
+                [
+                    "mesa_prime_systems",
+                    0.1
                 ]
             ]
         },
@@ -3212,6 +3383,52 @@
                 ]
             ]
         },
+        "axi_a5": {
+            "intact": [
+                [
+                    "akvasto_prime_blueprint",
+                    0.02
+                ],
+                [
+                    "akvasto_prime_link",
+                    0.11
+                ],
+                [
+                    "vasto_prime_barrel",
+                    0.25329999999999997
+                ],
+                [
+                    "vasto_prime_blueprint",
+                    0.11
+                ],
+                [
+                    "vasto_prime_receiver",
+                    0.25329999999999997
+                ]
+            ],
+            "radiant": [
+                [
+                    "akvasto_prime_blueprint",
+                    0.1
+                ],
+                [
+                    "akvasto_prime_link",
+                    0.2
+                ],
+                [
+                    "vasto_prime_barrel",
+                    0.16670000000000001
+                ],
+                [
+                    "vasto_prime_blueprint",
+                    0.2
+                ],
+                [
+                    "vasto_prime_receiver",
+                    0.16670000000000001
+                ]
+            ]
+        },
         "axi_r1": {
             "intact": [
                 [
@@ -4088,6 +4305,52 @@
                 ]
             ]
         },
+        "lith_b6": {
+            "intact": [
+                [
+                    "ballistica_prime_blueprint",
+                    0.02
+                ],
+                [
+                    "fang_prime_blueprint",
+                    0.25329999999999997
+                ],
+                [
+                    "lex_prime_barrel",
+                    0.25329999999999997
+                ],
+                [
+                    "limbo_prime_systems",
+                    0.25329999999999997
+                ],
+                [
+                    "orthos_prime_blueprint",
+                    0.11
+                ]
+            ],
+            "radiant": [
+                [
+                    "ballistica_prime_blueprint",
+                    0.1
+                ],
+                [
+                    "fang_prime_blueprint",
+                    0.16670000000000001
+                ],
+                [
+                    "lex_prime_barrel",
+                    0.16670000000000001
+                ],
+                [
+                    "limbo_prime_systems",
+                    0.16670000000000001
+                ],
+                [
+                    "orthos_prime_blueprint",
+                    0.2
+                ]
+            ]
+        },
         "axi_v6": {
             "intact": [
                 [
@@ -4134,6 +4397,44 @@
                 ]
             ]
         },
+        "meso_a1": {
+            "intact": [
+                [
+                    "ballistica_prime_lower_limb",
+                    0.25329999999999997
+                ],
+                [
+                    "kronen_prime_handle",
+                    0.11
+                ],
+                [
+                    "orthos_prime_handle",
+                    0.25329999999999997
+                ],
+                [
+                    "sybaris_prime_stock",
+                    0.25329999999999997
+                ]
+            ],
+            "radiant": [
+                [
+                    "ballistica_prime_lower_limb",
+                    0.16670000000000001
+                ],
+                [
+                    "kronen_prime_handle",
+                    0.2
+                ],
+                [
+                    "orthos_prime_handle",
+                    0.16670000000000001
+                ],
+                [
+                    "sybaris_prime_stock",
+                    0.16670000000000001
+                ]
+            ]
+        },
         "neo_b5": {
             "intact": [
                 [
@@ -4176,6 +4477,60 @@
                 ],
                 [
                     "oberon_prime_blueprint",
+                    0.2
+                ]
+            ]
+        },
+        "meso_p1": {
+            "intact": [
+                [
+                    "ballistica_prime_receiver",
+                    0.11
+                ],
+                [
+                    "bronco_prime_receiver",
+                    0.25329999999999997
+                ],
+                [
+                    "chroma_prime_blueprint",
+                    0.25329999999999997
+                ],
+                [
+                    "oberon_prime_chassis",
+                    0.25329999999999997
+                ],
+                [
+                    "pyrana_prime_blueprint",
+                    0.02
+                ],
+                [
+                    "silva_and_aegis_prime_blueprint",
+                    0.11
+                ]
+            ],
+            "radiant": [
+                [
+                    "ballistica_prime_receiver",
+                    0.2
+                ],
+                [
+                    "bronco_prime_receiver",
+                    0.16670000000000001
+                ],
+                [
+                    "chroma_prime_blueprint",
+                    0.16670000000000001
+                ],
+                [
+                    "oberon_prime_chassis",
+                    0.16670000000000001
+                ],
+                [
+                    "pyrana_prime_blueprint",
+                    0.1
+                ],
+                [
+                    "silva_and_aegis_prime_blueprint",
                     0.2
                 ]
             ]
@@ -5648,6 +6003,52 @@
                 ]
             ]
         },
+        "lith_k2": {
+            "intact": [
+                [
+                    "braton_prime_barrel",
+                    0.25329999999999997
+                ],
+                [
+                    "braton_prime_blueprint",
+                    0.11
+                ],
+                [
+                    "kogake_prime_gauntlet",
+                    0.02
+                ],
+                [
+                    "rubico_prime_receiver",
+                    0.25329999999999997
+                ],
+                [
+                    "zephyr_prime_neuroptics",
+                    0.25329999999999997
+                ]
+            ],
+            "radiant": [
+                [
+                    "braton_prime_barrel",
+                    0.16670000000000001
+                ],
+                [
+                    "braton_prime_blueprint",
+                    0.2
+                ],
+                [
+                    "kogake_prime_gauntlet",
+                    0.1
+                ],
+                [
+                    "rubico_prime_receiver",
+                    0.16670000000000001
+                ],
+                [
+                    "zephyr_prime_neuroptics",
+                    0.16670000000000001
+                ]
+            ]
+        },
         "meso_n3": {
             "intact": [
                 [
@@ -5791,6 +6192,60 @@
                 [
                     "trinity_prime_systems",
                     0.16670000000000001
+                ]
+            ]
+        },
+        "axi_c4": {
+            "intact": [
+                [
+                    "braton_prime_blueprint",
+                    0.25329999999999997
+                ],
+                [
+                    "chroma_prime_systems",
+                    0.02
+                ],
+                [
+                    "hydroid_prime_chassis",
+                    0.25329999999999997
+                ],
+                [
+                    "kogake_prime_blueprint",
+                    0.11
+                ],
+                [
+                    "pyrana_prime_barrel",
+                    0.25329999999999997
+                ],
+                [
+                    "sybaris_prime_receiver",
+                    0.11
+                ]
+            ],
+            "radiant": [
+                [
+                    "braton_prime_blueprint",
+                    0.16670000000000001
+                ],
+                [
+                    "chroma_prime_systems",
+                    0.1
+                ],
+                [
+                    "hydroid_prime_chassis",
+                    0.16670000000000001
+                ],
+                [
+                    "kogake_prime_blueprint",
+                    0.2
+                ],
+                [
+                    "pyrana_prime_barrel",
+                    0.16670000000000001
+                ],
+                [
+                    "sybaris_prime_receiver",
+                    0.2
                 ]
             ]
         },
@@ -6086,6 +6541,52 @@
                 ]
             ]
         },
+        "meso_z2": {
+            "intact": [
+                [
+                    "braton_prime_blueprint",
+                    0.25329999999999997
+                ],
+                [
+                    "hydroid_prime_blueprint",
+                    0.11
+                ],
+                [
+                    "rubico_prime_barrel",
+                    0.11
+                ],
+                [
+                    "sybaris_prime_blueprint",
+                    0.25329999999999997
+                ],
+                [
+                    "zephyr_prime_systems",
+                    0.02
+                ]
+            ],
+            "radiant": [
+                [
+                    "braton_prime_blueprint",
+                    0.16670000000000001
+                ],
+                [
+                    "hydroid_prime_blueprint",
+                    0.2
+                ],
+                [
+                    "rubico_prime_barrel",
+                    0.2
+                ],
+                [
+                    "sybaris_prime_blueprint",
+                    0.16670000000000001
+                ],
+                [
+                    "zephyr_prime_systems",
+                    0.1
+                ]
+            ]
+        },
         "axi_v3": {
             "intact": [
                 [
@@ -6274,6 +6775,52 @@
                 ],
                 [
                     "paris_prime_blueprint",
+                    0.16670000000000001
+                ]
+            ]
+        },
+        "lith_c4": {
+            "intact": [
+                [
+                    "braton_prime_stock",
+                    0.11
+                ],
+                [
+                    "burston_prime_receiver",
+                    0.25329999999999997
+                ],
+                [
+                    "chroma_prime_neuroptics",
+                    0.02
+                ],
+                [
+                    "orthos_prime_blade",
+                    0.11
+                ],
+                [
+                    "paris_prime_lower_limb",
+                    0.25329999999999997
+                ]
+            ],
+            "radiant": [
+                [
+                    "braton_prime_stock",
+                    0.2
+                ],
+                [
+                    "burston_prime_receiver",
+                    0.16670000000000001
+                ],
+                [
+                    "chroma_prime_neuroptics",
+                    0.1
+                ],
+                [
+                    "orthos_prime_blade",
+                    0.2
+                ],
+                [
+                    "paris_prime_lower_limb",
                     0.16670000000000001
                 ]
             ]
@@ -6750,6 +7297,44 @@
                 ],
                 [
                     "venka_prime_gauntlet",
+                    0.1
+                ]
+            ]
+        },
+        "neo_s9": {
+            "intact": [
+                [
+                    "bronco_prime_blueprint",
+                    0.25329999999999997
+                ],
+                [
+                    "destreza_prime_blueprint",
+                    0.11
+                ],
+                [
+                    "mirage_prime_neuroptics",
+                    0.25329999999999997
+                ],
+                [
+                    "silva_and_aegis_prime_guard",
+                    0.02
+                ]
+            ],
+            "radiant": [
+                [
+                    "bronco_prime_blueprint",
+                    0.16670000000000001
+                ],
+                [
+                    "destreza_prime_blueprint",
+                    0.2
+                ],
+                [
+                    "mirage_prime_neuroptics",
+                    0.16670000000000001
+                ],
+                [
+                    "silva_and_aegis_prime_guard",
                     0.1
                 ]
             ]
@@ -8028,6 +8613,44 @@
                 ]
             ]
         },
+        "axi_r2": {
+            "intact": [
+                [
+                    "chroma_prime_chassis",
+                    0.11
+                ],
+                [
+                    "destreza_prime_handle",
+                    0.25329999999999997
+                ],
+                [
+                    "lex_prime_receiver",
+                    0.25329999999999997
+                ],
+                [
+                    "mirage_prime_systems",
+                    0.11
+                ]
+            ],
+            "radiant": [
+                [
+                    "chroma_prime_chassis",
+                    0.2
+                ],
+                [
+                    "destreza_prime_handle",
+                    0.16670000000000001
+                ],
+                [
+                    "lex_prime_receiver",
+                    0.16670000000000001
+                ],
+                [
+                    "mirage_prime_systems",
+                    0.2
+                ]
+            ]
+        },
         "meso_t3": {
             "intact": [
                 [
@@ -8834,6 +9457,52 @@
                 ]
             ]
         },
+        "meso_m2": {
+            "intact": [
+                [
+                    "fang_prime_blade",
+                    0.25329999999999997
+                ],
+                [
+                    "kogake_prime_boot",
+                    0.25329999999999997
+                ],
+                [
+                    "mirage_prime_blueprint",
+                    0.02
+                ],
+                [
+                    "paris_prime_string",
+                    0.25329999999999997
+                ],
+                [
+                    "silva_and_aegis_prime_blade",
+                    0.11
+                ]
+            ],
+            "radiant": [
+                [
+                    "fang_prime_blade",
+                    0.16670000000000001
+                ],
+                [
+                    "kogake_prime_boot",
+                    0.16670000000000001
+                ],
+                [
+                    "mirage_prime_blueprint",
+                    0.1
+                ],
+                [
+                    "paris_prime_string",
+                    0.16670000000000001
+                ],
+                [
+                    "silva_and_aegis_prime_blade",
+                    0.2
+                ]
+            ]
+        },
         "lith_v2": {
             "intact": [
                 [
@@ -8923,6 +9592,52 @@
                 [
                     "vauban_prime_systems",
                     0.1
+                ]
+            ]
+        },
+        "axi_l3": {
+            "intact": [
+                [
+                    "fang_prime_handle",
+                    0.25329999999999997
+                ],
+                [
+                    "kronen_prime_blueprint",
+                    0.25329999999999997
+                ],
+                [
+                    "limbo_prime_chassis",
+                    0.02
+                ],
+                [
+                    "nami_skyla_prime_blueprint",
+                    0.25329999999999997
+                ],
+                [
+                    "zephyr_prime_chassis",
+                    0.11
+                ]
+            ],
+            "radiant": [
+                [
+                    "fang_prime_handle",
+                    0.16670000000000001
+                ],
+                [
+                    "kronen_prime_blueprint",
+                    0.16670000000000001
+                ],
+                [
+                    "limbo_prime_chassis",
+                    0.1
+                ],
+                [
+                    "nami_skyla_prime_blueprint",
+                    0.16670000000000001
+                ],
+                [
+                    "zephyr_prime_chassis",
+                    0.2
                 ]
             ]
         },
@@ -9432,6 +10147,52 @@
                 ]
             ]
         },
+        "lith_m3": {
+            "intact": [
+                [
+                    "mesa_prime_neuroptics",
+                    0.02
+                ],
+                [
+                    "oberon_prime_blueprint",
+                    0.11
+                ],
+                [
+                    "paris_prime_blueprint",
+                    0.25329999999999997
+                ],
+                [
+                    "rubico_prime_stock",
+                    0.11
+                ],
+                [
+                    "silva_and_aegis_prime_hilt",
+                    0.25329999999999997
+                ]
+            ],
+            "radiant": [
+                [
+                    "mesa_prime_neuroptics",
+                    0.1
+                ],
+                [
+                    "oberon_prime_blueprint",
+                    0.2
+                ],
+                [
+                    "paris_prime_blueprint",
+                    0.16670000000000001
+                ],
+                [
+                    "rubico_prime_stock",
+                    0.2
+                ],
+                [
+                    "silva_and_aegis_prime_hilt",
+                    0.16670000000000001
+                ]
+            ]
+        },
         "meso_n4": {
             "intact": [
                 [
@@ -9528,36 +10289,6 @@
                 ],
                 [
                     "tigris_prime_stock",
-                    0.16670000000000001
-                ]
-            ]
-        },
-        "axi_a5": {
-            "intact": [
-                [
-                    "vasto_prime_barrel",
-                    0.25329999999999997
-                ],
-                [
-                    "vasto_prime_blueprint",
-                    0.11
-                ],
-                [
-                    "vasto_prime_receiver",
-                    0.25329999999999997
-                ]
-            ],
-            "radiant": [
-                [
-                    "vasto_prime_barrel",
-                    0.16670000000000001
-                ],
-                [
-                    "vasto_prime_blueprint",
-                    0.2
-                ],
-                [
-                    "vasto_prime_receiver",
                     0.16670000000000001
                 ]
             ]
