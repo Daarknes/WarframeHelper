@@ -55,7 +55,9 @@ class Window(QMainWindow):
             comp_buy_repr = instance.config["calc_component_repr"](component_prices, "buy")
 
             
-            table.setItem(i, 0, QTableWidgetItem(" ".join(item_name.split("_"))))
+            item = QTableWidgetItem(" ".join(item_name.split("_")))
+            item.setToolTip(", ".join(components))
+            table.setItem(i, 0, item)
 
             item = QTableWidgetItem()
             item.setData(Qt.EditRole, set_repr)
