@@ -133,33 +133,29 @@ class Window(QMainWindow):
         table.verticalHeader().hide()
         
         for i, (relic_name, relic_data) in enumerate(market_names["relics"].items()):
-            row = [0, 0, 0, 0]
+            row = ["-"] * 4
             
             for j, (relic_type, components) in enumerate(relic_data.items()):
                 relic_price = relic_prices[relic_name + "_" + relic_type]
                 if relic_price is None: # if we have no data for this relic, we don't want to show it
                     continue
             
-                buy_repr = instance.config["calc_buy_repr"](relic_price)
+#                buy_repr = instance.config["calc_buy_repr"](relic_price)
                 sell_repr = instance.config["calc_sell_repr"](relic_price)
                 
-                invalid_flag = True
-                
-                if buy_repr is None:
-                    buy_repr = 9999999
-                else:
-                    invalid_flag = False
+#                if buy_repr is None:
+#                    buy_repr = 9999999
+#                else:
+#                    invalid_flag = False
                 
                 if sell_repr is None:
-                    sell_repr = 9999999
-                else:
-                    invalid_flag = False
+                    continue
                     
                 # best_relic_price = min(buy_repr, sell_repr)
                 best_relic_price = sell_repr # a lot of people try to buy relics way too cheap
                 
                 
-                if best_relic_price == 0 or invalid_flag:
+                if best_relic_price <= 0:
                     continue # We can't buy this relic, so we can skip it
                 
                 income = 0
@@ -174,7 +170,13 @@ class Window(QMainWindow):
                     buy_repr = instance.config["calc_buy_repr"](current_price)
                     sell_repr = instance.config["calc_sell_repr"](current_price)
                     
-                    best_item_price = max(buy_repr, sell_repr)
+                    if buy_repr and sell_repr:
+                        best_item_price = max(buy_repr, sell_repr)
+                    elif not (buy_repr or sell_repr):
+                        continue
+                    else:
+                        best_item_price = buy_repr or sell_repr
+                    
                     income += best_item_price * component_probability
                 
                 row[2*j] = income
@@ -192,8 +194,9 @@ class Window(QMainWindow):
             item.setData(Qt.EditRole, row[1])
             table.setItem(i, 2, item)
             
-            price_value = row[2] * 4 - row[1]
-            if (price_value < 0):
+            if row[2] != "-" and row[1] != "-":
+                price_value = row[2] * 4 - row[1]
+            else:
                 price_value = "-"
             item = QTableWidgetItem()
             item.setData(Qt.EditRole, price_value)
@@ -207,8 +210,9 @@ class Window(QMainWindow):
             item.setData(Qt.EditRole, row[2])
             table.setItem(i, 5, item)
             
-            price_value = (row[2] * 4) - row[3]
-            if (price_value < 0):
+            if row[2] != "-" and row[3] != "-":
+                price_value = row[2] * 4 - row[3]
+            else:
                 price_value = "-"
             item = QTableWidgetItem()
             item.setData(Qt.EditRole, price_value)
