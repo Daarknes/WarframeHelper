@@ -108,6 +108,7 @@ def update():
         "Melee": process_item, "Warframes": process_item, "Secondary": process_item, "Sentinels": process_item, "Primary": process_item, "Archwing":process_item,
         "Mods": process_mod
     }
+    special_items = ["Kavasa Prime Kubrow Collar"]
 
 
     # load raw data and process it
@@ -117,6 +118,8 @@ def update():
     for entry in data:
         if entry["category"] in category_funcs:
             category_funcs[entry["category"]](entry)
+        elif entry["name"] in special_items:
+            process_item(entry)
     
     # save data to corresponding files
     with open(constants.OCR_NAMES_LOC, "w") as f:

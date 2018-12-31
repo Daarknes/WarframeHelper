@@ -197,6 +197,11 @@
             "neuroptics",
             "systems"
         ],
+        "kavasa_prime_kubrow_collar": [
+            "blueprint",
+            "kavasa_prime_band",
+            "kavasa_prime_buckle"
+        ],
         "kogake_prime": [
             "blueprint",
             "boot",
@@ -9768,6 +9773,10 @@
                     0.02
                 ],
                 [
+                    "kavasa_prime_kubrow_collar_blueprint",
+                    0.11
+                ],
+                [
                     "nekros_prime_chassis",
                     0.25329999999999997
                 ],
@@ -9784,6 +9793,10 @@
                 [
                     "galatine_prime_blueprint",
                     0.1
+                ],
+                [
+                    "kavasa_prime_kubrow_collar_blueprint",
+                    0.2
                 ],
                 [
                     "nekros_prime_chassis",
@@ -10044,6 +10057,10 @@
                     0.25329999999999997
                 ],
                 [
+                    "kavasa_prime_kubrow_collar_blueprint",
+                    0.11
+                ],
+                [
                     "nyx_prime_chassis",
                     0.02
                 ],
@@ -10062,6 +10079,10 @@
                     0.16670000000000001
                 ],
                 [
+                    "kavasa_prime_kubrow_collar_blueprint",
+                    0.2
+                ],
+                [
                     "nyx_prime_chassis",
                     0.1
                 ],
@@ -10072,6 +10093,52 @@
                 [
                     "vectis_prime_barrel",
                     0.16670000000000001
+                ]
+            ]
+        },
+        "lith_s4": {
+            "intact": [
+                [
+                    "kavasa_prime_kubrow_collar_blueprint",
+                    0.11
+                ],
+                [
+                    "lex_prime_blueprint",
+                    0.25329999999999997
+                ],
+                [
+                    "paris_prime_blueprint",
+                    0.25329999999999997
+                ],
+                [
+                    "saryn_prime_blueprint",
+                    0.02
+                ],
+                [
+                    "trinity_prime_chassis",
+                    0.11
+                ]
+            ],
+            "radiant": [
+                [
+                    "kavasa_prime_kubrow_collar_blueprint",
+                    0.2
+                ],
+                [
+                    "lex_prime_blueprint",
+                    0.16670000000000001
+                ],
+                [
+                    "paris_prime_blueprint",
+                    0.16670000000000001
+                ],
+                [
+                    "saryn_prime_blueprint",
+                    0.1
+                ],
+                [
+                    "trinity_prime_chassis",
+                    0.2
                 ]
             ]
         },
@@ -10126,44 +10193,6 @@
                 [
                     "venka_prime_gauntlet",
                     0.1
-                ]
-            ]
-        },
-        "lith_s4": {
-            "intact": [
-                [
-                    "lex_prime_blueprint",
-                    0.25329999999999997
-                ],
-                [
-                    "paris_prime_blueprint",
-                    0.25329999999999997
-                ],
-                [
-                    "saryn_prime_blueprint",
-                    0.02
-                ],
-                [
-                    "trinity_prime_chassis",
-                    0.11
-                ]
-            ],
-            "radiant": [
-                [
-                    "lex_prime_blueprint",
-                    0.16670000000000001
-                ],
-                [
-                    "paris_prime_blueprint",
-                    0.16670000000000001
-                ],
-                [
-                    "saryn_prime_blueprint",
-                    0.1
-                ],
-                [
-                    "trinity_prime_chassis",
-                    0.2
                 ]
             ]
         },
