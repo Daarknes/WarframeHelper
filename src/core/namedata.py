@@ -24,8 +24,13 @@ def update():
     market_data = {"items": {}, "mods": [], "relics": {}}
     
     
+    _special_names = {"Kavasa Prime Kubrow Collar": "Kavasa Prime Collar"}
     def get_market_name(entry):
-        market_name = entry["name"].replace(" ", "_").lower()
+        market_name = entry["name"]
+        if market_name in _special_names:
+            market_name = _special_names[entry["name"]]
+
+        market_name = market_name.replace(" ", "_").lower()
         for key, value in special_map.items():
             market_name = market_name.replace(key, value)
         return market_name
@@ -120,6 +125,7 @@ def update():
             category_funcs[entry["category"]](entry)
         elif entry["name"] in special_items:
             process_item(entry)
+    
     
     # save data to corresponding files
     with open(constants.OCR_NAMES_LOC, "w") as f:

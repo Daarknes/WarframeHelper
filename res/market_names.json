@@ -197,10 +197,10 @@
             "neuroptics",
             "systems"
         ],
-        "kavasa_prime_kubrow_collar": [
+        "kavasa_prime_collar": [
             "blueprint",
-            "kavasa_prime_band",
-            "kavasa_prime_buckle"
+            "band",
+            "buckle"
         ],
         "kogake_prime": [
             "blueprint",
@@ -9773,7 +9773,7 @@
                     0.02
                 ],
                 [
-                    "kavasa_prime_kubrow_collar_blueprint",
+                    "kavasa_prime_collar_blueprint",
                     0.11
                 ],
                 [
@@ -9795,7 +9795,7 @@
                     0.1
                 ],
                 [
-                    "kavasa_prime_kubrow_collar_blueprint",
+                    "kavasa_prime_collar_blueprint",
                     0.2
                 ],
                 [
@@ -10057,7 +10057,7 @@
                     0.25329999999999997
                 ],
                 [
-                    "kavasa_prime_kubrow_collar_blueprint",
+                    "kavasa_prime_collar_blueprint",
                     0.11
                 ],
                 [
@@ -10079,7 +10079,7 @@
                     0.16670000000000001
                 ],
                 [
-                    "kavasa_prime_kubrow_collar_blueprint",
+                    "kavasa_prime_collar_blueprint",
                     0.2
                 ],
                 [
@@ -10099,7 +10099,7 @@
         "lith_s4": {
             "intact": [
                 [
-                    "kavasa_prime_kubrow_collar_blueprint",
+                    "kavasa_prime_collar_blueprint",
                     0.11
                 ],
                 [
@@ -10121,7 +10121,7 @@
             ],
             "radiant": [
                 [
-                    "kavasa_prime_kubrow_collar_blueprint",
+                    "kavasa_prime_collar_blueprint",
                     0.2
                 ],
                 [

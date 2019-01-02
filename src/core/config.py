@@ -1,6 +1,8 @@
 import os
 import re
 from builtins import isinstance
+import traceback
+import sys
 
 
 section_str = """#===============================================================================
@@ -15,6 +17,7 @@ class FunctionBlock():
     def __init__(self, body, *params):
         self._body = body
         self._params = params
+        self._fname = None
         
         code = "def func(" + ", ".join(params) + "):\n"
         for line in body.split("\n"):
@@ -23,7 +26,36 @@ class FunctionBlock():
         self._func = eval("func")
 
     def __call__(self, *params):
-        return self._func(*params)
+        try:
+            return self._func(*params)
+        except:
+            print("Traceback (most recent call last):", file=sys.stderr)
+            # print caller info
+            traceback.print_stack(sys._getframe(1))
+            
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            tb = exc_tb
+            while tb is not None:
+                exc_tb = tb
+                tb = tb.tb_next
+            
+            if self._fname is not None:
+                print("  Traceback for function '{}':".format(self._fname), file=sys.stderr)
+            
+            lines = self._body.split("\n")
+            lineno = exc_tb.tb_lineno - 2
+            num_digits = len(str(len(lines)))
+            
+            for i, line in enumerate(lines):
+                line = str(i).rjust(num_digits, " ") + " " + line
+                if i == lineno:
+                    line = "    -> " + line
+                else:
+                    line = "       " + line
+                print(line, file=sys.stderr)
+
+            print(*traceback.format_exception_only(exc_type, exc_obj), file=sys.stderr)
+            sys.exit(1)
 
     def __str__(self):
         return _block_sym + self._body + _block_sym
@@ -90,6 +122,7 @@ class Config():
 
             value = res.group(2)
             self._entries[key] = FunctionBlock(value, *self._defaults[key]._params)
+            self._entries[key]._fname = key
             # add FunctionBlocks to the globals dict to make all "functions" accessible
             globals()[key] = self._entries[key]
         
@@ -137,6 +170,7 @@ class _ConfigSection():
 
     def addEntry(self, key, value, comment):
         if isinstance(value, FunctionBlock):
+            value._fname = key
             comment += " (PARAMS: " + ", ".join(value._params) + ")"
         else:
             comment += " (DEFAULT: " + str(value) + ")"
