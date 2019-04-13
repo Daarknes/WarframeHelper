@@ -26,6 +26,7 @@ _section_market.addEntry("BATCH_SIZE", 200, "The size of each batch (the number 
 _section_market.addEntry("MAX_CONNECTIONS", 30, "The maximum number of simultaneous threads for http-requests")
 _section_market.addEntry("MAX_ORDER_AGE", 6, "Only include orders of players that are either in-game, or that have been updated in the last X hours")
 _section_market.addEntry("MAX_UPDATE_AGE", 12, "The local market data (the prices) gets updated after this amount of hours")
+_section_market.addEntry("RELIC_ITEMS_ONLY", True, "Only download prices for relic rewards")
 
 _config.build()
 _config.loadAndUpdate(constants.CONFIG_LOC + "warframemarket.cfg")
@@ -53,7 +54,7 @@ def _update_prices():
     session.mount('https://', adapter)
     session.headers.update({
             'Accept': "application/json",
-            'Content-Type': "application/json",
+            'Content-Type': "application/json",+
             'Language': "en",
             'Platform': "pc"
         })
@@ -72,7 +73,7 @@ def _update_prices():
 
         return response.json()
         
-    
+    print("[WFMarket] Downloading a total of {} item-prices...".format(len(market_data)))
     first_batch = True
     for batch in utils.batch_iter(list(market_data.items()), _config['BATCH_SIZE']):
         if not first_batch:
@@ -153,20 +154,34 @@ def _ensure_loaded():
 #===============================================================================
 # item-data
 #===============================================================================
-def _parse_category(parsed_items, wfm_items, component_list=None):
+def _parse_category(parsed_items, wfm_items, component_list=None, filter_dict=None):
     items = {}
 
     for item_name, item_data in parsed_items.items():
-        if component_list:
-            item_data['components'] = {comp_name: {} for comp_name in component_list}
-            
-        if "components" in item_data:
-            if item_name + " Set" in wfm_items:
-                items[item_name] = {"url_name": wfm_items[item_name + " Set"], "components": item_data['components']}
+        if filter_dict and item_name not in filter_dict:
+            continue
 
-                for component_name, component_data in item_data['components'].items():
+        if component_list:
+            component_data = {comp_name: {} for comp_name in component_list}
+        elif 'components' in item_data:
+            component_data = item_data['components']
+        else:
+            component_data = None
+
+        if component_data:
+            if item_name + " Set" in wfm_items:
+                components = {}
+                for component_name, component_data in component_data.items():
+                    if filter_dict and component_name not in filter_dict[item_name]:
+                        continue
+
                     full_name = item_name + " " + component_name
-                    component_data['url_name'] = wfm_items[full_name]
+                    components[component_name] = dict(component_data)
+                    components[component_name]['url_name'] = wfm_items[full_name]
+
+                # only add this entry when there are any components
+                if components:
+                    items[item_name] = {"url_name": wfm_items[item_name + " Set"], "components": components}
 
         elif item_name in wfm_items:
             items[item_name] = {"url_name": wfm_items[item_name]}
@@ -195,25 +210,42 @@ def _update_item_data():
 
 
     raw_item_data = itemdata.item_data()
+
+    filter_dict = None
+    if _config['RELIC_ITEMS_ONLY']:
+        filter_dict = {}
+
+        for relic in raw_item_data[Category.RELICS].values():
+            for drop in relic['drops']:
+                # ignore Forma
+                if drop['item'] == "Forma":
+                    continue
+                
+                item_name = drop['item'] + " Prime"
+                if item_name not in filter_dict:
+                    filter_dict[item_name] = set()
+    
+                filter_dict[item_name].add(drop['part'])
     
     global _item_data
     _item_data = {
-        Category.WEAPONS: _parse_category(raw_item_data[Category.WEAPONS], wfm_items),
-        Category.WARFRAMES: _parse_category(raw_item_data[Category.WARFRAMES], wfm_items, component_list=("Blueprint", "Chassis", "Neuroptics", "Systems")),
-        Category.ARCHWINGS: _parse_category(raw_item_data[Category.ARCHWINGS], wfm_items, component_list=("Wings", "Harness", "Systems")),
-        Category.MODS: {mod_name: {"url_name": wfm_items[mod_name]} for mod_name in raw_item_data[Category.MODS] if mod_name in wfm_items},
-        Category.COMPANIONS: _parse_category(raw_item_data[Category.COMPANIONS], wfm_items, component_list=("Blueprint", "Cerebrum", "Carapace", "Systems")),
-        Category.RELICS: {}
+        Category.WEAPONS: _parse_category(raw_item_data[Category.WEAPONS], wfm_items, filter_dict=filter_dict),
+        Category.WARFRAMES: _parse_category(raw_item_data[Category.WARFRAMES], wfm_items, component_list=("Blueprint", "Chassis", "Neuroptics", "Systems"), filter_dict=filter_dict),
+        Category.ARCHWINGS: _parse_category(raw_item_data[Category.ARCHWINGS], wfm_items, component_list=("Wings", "Harness", "Systems"), filter_dict=filter_dict),
+        Category.COMPANIONS: _parse_category(raw_item_data[Category.COMPANIONS], wfm_items, component_list=("Blueprint", "Cerebrum", "Carapace", "Systems"), filter_dict=filter_dict),
+#         Category.RELICS: {}
     }
 
-    # manually add Odonata Prime Blueprint
-    _item_data[Category.ARCHWINGS]['Odonata Prime']['components']['Blueprint'] = {"url_name": wfm_items['Odonata Prime Blueprint']}
+    if not _config['RELIC_ITEMS_ONLY']:
+        _item_data[Category.MODS] = {mod_name: {"url_name": wfm_items[mod_name]} for mod_name in raw_item_data[Category.MODS] if mod_name in wfm_items}
+        # manually add Odonata Prime Blueprint
+        _item_data[Category.ARCHWINGS]['Odonata Prime']['components']['Blueprint'] = {"url_name": wfm_items['Odonata Prime Blueprint']}
 
     # add relics
-    for relic_name, relic_data in raw_item_data[Category.RELICS].items():
-        if relic_name + " Radiant" in wfm_items:
-            _item_data[Category.RELICS][relic_name] = relic_data
-            relic_data['url_name'] = wfm_items[relic_name + " Radiant"]
+#     for relic_name, relic_data in raw_item_data[Category.RELICS].items():
+#         if relic_name + " Radiant" in wfm_items:
+#             _item_data[Category.RELICS][relic_name] = relic_data
+#             relic_data['url_name'] = wfm_items[relic_name + " Radiant"]
 
 
     with open(constants.MARKET_ITEM_DATA_LOC, "w") as f:

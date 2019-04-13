@@ -4,3 +4,6 @@ Note: Those items are not tradable even though they are marked as such in the fi
 - Primed Sure Footed
 - Primed Vigor
 - Primed Shred
+Wrong Names:
+- Kavasa Prime Band -> Band
+- Kavasa Prime Buckle -> Buckle
