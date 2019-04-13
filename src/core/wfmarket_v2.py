@@ -54,7 +54,7 @@ def _update_prices():
     session.mount('https://', adapter)
     session.headers.update({
             'Accept': "application/json",
-            'Content-Type': "application/json",+
+            'Content-Type': "application/json",
             'Language': "en",
             'Platform': "pc"
         })
