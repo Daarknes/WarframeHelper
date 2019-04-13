@@ -50,8 +50,8 @@ instance.setConfig(config)
     
 if __name__ == "__main__":
     # load (and possibly update) warframe market
-    from core import wfmarket
-    wfmarket.load()
+    from core import wfmarket_v2
+    wfmarket_v2.load()
 
     from PyQt5.QtWidgets import QApplication
     from market.app import Window

@@ -11,7 +11,7 @@ import time
 from core.config import Config
 
 
-_address = "https://api.warframe.market/v1/items/{}/orders?include=item"
+_address = "https://api.warframe.market/v1/items/{}/orders"
 
 _warframe_parts = ["chassis", "systems", "neuroptics"]
 _special_map = {
@@ -134,14 +134,11 @@ def update():
             infos.append(_Info(relic_name + "_" + relic_type, CAT_RELICS))
     
     # helper method for requesting prices and updating the loading bar
-    i = 0
     progress = ProgressBar(40, len(infos))
     def request_prices(info):
         prices = _request_prices(str(info))
         # update progress bar
-        nonlocal i
-        i += 1
-        progress.update(i)
+        progress.update()
         return prices
     
     # "simultaneously" request the prices for all market names

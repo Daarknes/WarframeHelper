@@ -5,6 +5,8 @@ import traceback
 import sys
 
 
+# TODO: rewrite this
+
 section_str = """#===============================================================================
 # {}
 #===============================================================================
@@ -59,14 +61,7 @@ class FunctionBlock():
 
     def __str__(self):
         return _block_sym + self._body + _block_sym
-        
-# def create_func(body, func_name, *param_names):
-#     code = "def " + func_name + "(" + ", ".join(param_names) + "):"
-#     for line in body.split("\n"):
-#         code += "  " + line + "\n"
-# 
-#     exec(code)
-#     return eval(func_name)
+
 
 class Config():
     def __init__(self):

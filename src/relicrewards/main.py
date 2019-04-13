@@ -22,12 +22,15 @@ instance.setConfig(_config)
 
 if __name__ == "__main__":
     # load (and possibly update) warframe market
-    from core import wfmarket
-    wfmarket.load()
+    from core import wfmarket_v2
+    wfmarket_v2.load()
 
     from PyQt5.QtWidgets import QApplication
     from relicrewards.app import Window
     from relicrewards import warframe_ocr
+
+    # we need to call this when we updated the item data    
+#     warframe_ocr.update_item_data()
 
 
 def excepthook(excType, excValue, tracebackobj):

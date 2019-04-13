@@ -12,9 +12,8 @@ import keyboard
 import win32gui
 
 from relicrewards import instance, warframe_ocr
-from core import wfmarket, constants
+from core import constants, wfmarket_v2
 from PyQt5.Qt import Qt
-import json
 
 
 price_quantile = 0.3
@@ -78,14 +77,10 @@ class Window(QMainWindow):
         else:
             self.labels[lId].setPalette(self.labelDefaultPalette)
 
+
 class KeyboardThread(QThread):
     textSignal = QtCore.pyqtSignal(int, str)
     paletteSignal = QtCore.pyqtSignal(int, bool)
-    
-    def __init__(self, parent):
-        QThread.__init__(self, parent)
-        with open(constants.OCR_DUCATES_LOC, "r") as f:
-            self.ducate_data = json.load(f)
     
     def run(self):
         while True:
@@ -113,14 +108,27 @@ class KeyboardThread(QThread):
                     os.makedirs(PATH_IMAGES)
                 image.save(PATH_IMAGES + str(datetime.now().strftime("%d-%m-%Y_%H-%M-%S")) + ".png")
 
-            item_names = warframe_ocr.get_item_names(image)
-            print("[Main] item names: ", item_names)
+            item_names, ducat_values = warframe_ocr.get_item_names(image)
+            print("[Main] item names:", list(item_names), "ducat values:", ducat_values)
             if not item_names:
                 for i in range(4):
                     self.textSignal.emit(i, "Error (Could not find item names)")
                 continue
             
-            item_prices = wfmarket.item_names_to_prices_map(item_names)
+            
+            item_prices = {}
+            for item_name in set(item_names):
+                try:
+                    prices = wfmarket_v2.get_prices(item_name)
+                except:
+                    prices = None
+
+                if prices is None:
+                    item_prices[item_name] = None
+                else:
+                    item_prices[item_name] = prices['sell']
+        
+
             bestLabel = None
             best_quantile = 0
 
@@ -128,13 +136,11 @@ class KeyboardThread(QThread):
             for i in range(4):
                 if 0 <= i-offset < len(item_names):
                     item_name = item_names[i - offset]
-                    text = item_name + "\nDucats: " + (str(self.ducate_data[item_name]) if item_name in self.ducate_data else "-") + "\n\n"
+                    text = item_name + "\nDucats: " + (str(ducat_values[i - offset]) if ducat_values[i - offset] else "-") + "\n\n"
                     prices = item_prices[item_names[i - offset]]
-                    
-                    if prices is None:
-                        text += "ERROR"
-                    elif len(prices) == 0:
-                        text += "Not sellable"
+
+                    if not prices:
+                        text += "ERROR / Not sellable"
                     else:
                         quantile = prices[int(price_quantile * len(prices))]
                         if quantile > best_quantile:

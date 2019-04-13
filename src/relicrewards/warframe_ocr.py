@@ -1,5 +1,4 @@
 from builtins import Exception
-import json
 import sys
 import traceback
 
@@ -12,7 +11,9 @@ from concurrent.futures.process import ProcessPoolExecutor
 import os
 from relicrewards import instance
 import matplotlib
-from core import constants
+from core import wikiscaper, itemdata
+import functools
+from core.itemdata import Category
 # import matplotlib.pyplot as plt
 
 
@@ -49,11 +50,14 @@ ref_spacing = 17
 
 # Process pool for tesseract paralellization
 _executor = None
+_ocr_item_to_ducats = None
 
 def init():
     global _executor
     _executor = ProcessPoolExecutor(max_workers=4)
-    _executor.map(str, range(4))
+    _executor.map(pytesseract.image_to_string, (np.zeros((50, 250)) for _ in range(4)))
+
+    update_item_data()
 
 def cleanup():
     _executor.shutdown()
@@ -187,12 +191,28 @@ def _get_text_image(part_image):
     
     return image
 
-def _filter_peaks(image, exp=10):
-    return ((1 - (1 - image / 255.0)**exp) * 255).astype(np.uint8)
+# def _filter_peaks(image, exp=10):
+#     return ((1 - (1 - image / 255.0)**exp) * 255).astype(np.uint8)
+
+
+def update_item_data():
+    item_data = itemdata.item_data()
+    
+    global _ocr_item_to_ducats
+    _ocr_item_to_ducats = {"FORMA BLUEPRINT": None}
+
+    for item_name, parts in wikiscaper.get_ducat_values(item_data[Category.RELICS]).items():
+        for part_name, ducats in parts.items():
+            full_name = item_name + " Prime " + part_name
+            if item_name+" Prime" in item_data[Category.WARFRAMES] and part_name != "Blueprint":
+                full_name += " Blueprint"
+
+            _ocr_item_to_ducats[full_name.upper()] = ducats
+
 
 def get_item_names(screenshot):
     """
-    converts a screenshot to valid warframe item names.
+    converts a screenshot to valid warframe item names and it's corresponding ducat value.
     @param screenshot: the screenshot as a PIL-Image or numpy-array
     """
     if _executor is None:
@@ -219,24 +239,22 @@ def get_item_names(screenshot):
 #             plt.imshow(tess_image, cmap="gray")
 #             plt.show()
         
-        item_names = _executor.map(_image_to_string, tess_images)
-        return list(item_names)
+        image_to_string = functools.partial(_image_to_string, name_list=list(_ocr_item_to_ducats.keys()))
+        item_names = list(_executor.map(image_to_string, tess_images))
+        return item_names, [_ocr_item_to_ducats.get(name) for name in item_names]
     except Exception:
         print("[WF OCR] Error:\n", traceback.print_exc(file=sys.stdout))
         return []
 
 
-with open(constants.OCR_NAMES_LOC, "r", encoding="utf-8") as f:
-    item_database = json.load(f)
-
-def _image_to_string(tess_image):    
+def _image_to_string(tess_image, name_list):    
     item_name = pytesseract.image_to_string(tess_image)
      
     # adjust to database
     lmin = 1e12
     best = item_name
  
-    for db_name in item_database:
+    for db_name in name_list:
         ldist = levenshtein_distance(item_name, db_name, costs=(2, 2, 1))
         if ldist < lmin:
             lmin = ldist

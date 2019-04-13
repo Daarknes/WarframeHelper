@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- config -->
+<head>
+	<meta charset="utf-8"/>
+	<title>Daarknes' Webserver</title>
+	<link rel="stylesheet" type="text/css" href="static/style.css">
+	<link rel="shortcut icon" href="/static/favicon.ico">
+	
+	<meta name="description" content="shown below site in google"/>
+	<meta name="keywords" content="keywords for a google search"/>
+    
+    <script src="static/sorttable.js"></script>
+</head>
+
+
+<body>
+<span id="refreshtimer" style="float:right;"></span>
+
+<div class="box">
+<h1>warframe.market helper</h1>
+<p>last update {{last_update}}</p>
+
+<div style="width:80%;" class="container">
+    <div class="tab">
+      <button class="tablinks" onclick="openTab(event, 'sets')" id="defaultOpen">Sets</button>
+      <button class="tablinks" onclick="openTab(event, 'single')">Single Items</button>
+    </div>
+
+    <div id="sets" class="tabcontent">
+    <table class="sortable" style="width: 100%">
+        <thead>
+            <th>Name</th>
+            <th>Buy type</th>
+            <th>Set (Sell)</th>
+            <th>Buy</th>
+            <th>Potential Profit</th>
+            <th>Profit per trade</th>
+        </thead>
+        <tbody>
+            {% for entry in list_sets %}
+            <tr>
+                <td><span title="{{ entry['components'] }}">{{ entry['name'] }}</span></td>
+                <td>{{ entry['buy_type'] }}</td>
+                <td>{{ entry['sell'] }}
+                {% if entry['sell_delta'] %}
+                    <span {% if entry['sell_delta'] >= 0 %} class="increase" {% else %}class="decrease"{% endif%}>{{ "%+i"|format(entry['sell_delta']) }}</span>
+                {% endif %}
+                </td>
+                <td>{{ entry['buy'] }}
+                {% if entry['buy_delta'] %}
+                    <span {% if entry['buy_delta'] < 0 %}class="increase" {% else %}class="decrease"{% endif%}>{{ "%+i"|format(entry['buy_delta']) }}</span>
+                {% endif %}
+                </td>
+                <td>{{ entry['profit'] }}
+                {% if entry['profit_delta'] %}
+                    <span {% if entry['profit_delta'] >= 0 %}class="increase" {% else %}class="decrease"{% endif%}>{{ "%+i"|format(entry['profit_delta']) }}</span>
+                {% endif %}
+                </td>
+                <td>{% if entry['profit_trade'] is not none %}{{ "%.1f"|format(entry['profit_trade']) }}{% else %}{{ entry['profit_trade'] }}{% endif %}
+                {% if entry['profit_trade_delta'] %}
+                    <span {% if entry['profit_trade_delta'] >= 0 %}class="increase" {% else %}class="decrease"{% endif%}>{{ "%+.1f"|format(entry['profit_trade_delta']) }}</span>
+                {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+      </tbody>
+    </table>
+    </div>
+
+    <div id="single" class="tabcontent">
+    <table class="sortable" style="width: 100%">
+        <thead>
+            <th>Name</th>
+            <th>Sell</th>
+            <th>Buy</th>
+            <th>Potential Profit</th>
+        </thead>
+        <tbody>
+            {% for entry in list_single %}
+            <tr>
+                <td>{{ entry['name'] }}</td>
+                <td>{{ entry['sell'] }}
+                {% if entry['sell_delta'] %}
+                    <span {% if entry['sell_delta'] >= 0 %} class="increase" {% else %}class="decrease"{% endif%}>{{ "%+i"|format(entry['sell_delta']) }}</span>
+                {% endif %}
+                </td>
+                <td>{{ entry['buy'] }}
+                {% if entry['buy_delta'] %}
+                    <span {% if entry['buy_delta'] < 0 %}class="increase" {% else %}class="decrease"{% endif%}>{{ "%+i"|format(entry['buy_delta']) }}</span>
+                {% endif %}
+                </td>
+                <td>{{ entry['profit'] }}
+                {% if entry['profit_delta'] %}
+                    <span {% if entry['profit_delta'] >= 0 %}class="increase" {% else %}class="decrease"{% endif%}>{{ "%+i"|format(entry['profit_delta']) }}</span>
+                {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+      </tbody>
+    </table>
+    </div>
+</div>
+
+</div>
+</body>
+
+<script>
+function openTab(evt, tabName)
+{
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
+}
+</script>
+  
+<script>
+// Get the element with id="defaultOpen" and click on it
+document.getElementById("defaultOpen").click();
+</script>
+
+<script>
+function actime()
+{
+    var d = new Date();
+    var secs_rem = 3600 - d.getMinutes() * 60 - d.getSeconds();
+    var mins_rem = ((secs_rem / 60) >> 0);
+    secs_rem %= 60;
+    
+    var text = "page reloads in";
+    if (mins_rem > 0)
+        text += " " + mins_rem + "m";
+    if (secs_rem > 0)
+        text += " " + secs_rem + "s";
+    text += ".";
+
+    document.getElementById("refreshtimer").innerText = text;
+    setTimeout(actime, 1000);
+}
+
+document.addEventListener('DOMContentLoaded', function(){ 
+    var d = new Date();
+    var seconds = 3600 - (d.getMinutes()*60 + d.getSeconds());    
+    setTimeout("window.location.reload(true);", seconds*1000);
+	actime();
+}, false);
+</script>
+</html>
