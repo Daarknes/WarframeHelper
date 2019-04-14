@@ -86,7 +86,7 @@ class KeyboardThread(QThread):
             keyboard.wait(instance.config["HOTKEY"])
             
             try:
-                hwnd = win32gui.FindWindow(None, r"Fotos")
+                hwnd = win32gui.FindWindow(None, r"Warframe")
                 win32gui.SetForegroundWindow(hwnd)
                 if win32gui.GetForegroundWindow() != hwnd:
                     raise Exception("Could not set the Warframe window as foreground")
