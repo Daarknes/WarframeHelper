@@ -1,5 +1,4 @@
 from builtins import Exception
-import sys
 
 import cv2
 import pytesseract
@@ -13,6 +12,7 @@ import matplotlib
 from core import wikiscaper, itemdata
 import functools
 from core.itemdata import Category
+import traceback
 # import matplotlib.pyplot as plt
 
 
@@ -23,6 +23,7 @@ else:
 
 if not os.path.exists(_tess_path):
     raise Exception("No tesseract.exe at '" + instance.config["TESSERACT_PATH"] + "'")
+
 pytesseract.pytesseract.tesseract_cmd = _tess_path
 del _tess_path
 
@@ -58,9 +59,13 @@ _executor = None
 _ocr_item_to_ducats = None
 
 def init():
+    # first try if pytessaract works at all
+    _ = pytesseract.image_to_string(np.zeros((50, 250)))
+
     global _executor
     _executor = ProcessPoolExecutor(max_workers=4)
-    _executor.map(pytesseract.image_to_string, (np.zeros((50, 250)) for _ in range(4)))
+    # try using pytessaract in parallel
+    _ = list(_executor.map(pytesseract.image_to_string, (np.zeros((50, 250)) for _ in range(4))))
 
     update_item_data()
 
@@ -247,15 +252,15 @@ def get_item_names(screenshot):
         image_to_string = functools.partial(_image_to_string, name_list=list(_ocr_item_to_ducats.keys()))
         item_names = list(_executor.map(image_to_string, tess_images))
         return item_names, [_ocr_item_to_ducats.get(name) for name in item_names]
-    except Exception as e:
+    except:
         print("[WF OCR] Error:")
-        print(e, file=sys.stderr)
+        traceback.print_exc()
         return [], []
 
 
-def _image_to_string(tess_image, name_list):    
+def _image_to_string(tess_image, name_list):
     item_name = pytesseract.image_to_string(tess_image)
-     
+
     # adjust to database
     lmin = 1e12
     best = item_name

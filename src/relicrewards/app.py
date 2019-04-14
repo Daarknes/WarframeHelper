@@ -13,6 +13,7 @@ import win32gui
 from relicrewards import instance, warframe_ocr
 from core import constants, wfmarket_v2
 from PyQt5.Qt import Qt
+import traceback
 
 
 price_quantile = 0.3
@@ -93,9 +94,9 @@ class KeyboardThread(QThread):
                 x1, y1, x2, y2 = win32gui.GetClientRect(hwnd)
                 x1, y1 = win32gui.ClientToScreen(hwnd, (x1, y1))
                 x2, y2 = win32gui.ClientToScreen(hwnd, (x2, y2))
-            except Exception as e:
+            except:
                 print("could not find and focus the Warframe window. Stacktrace:")
-                print(e, file=sys.stderr)
+                traceback.print_exc()
                 continue
             
             for i in range(4):
