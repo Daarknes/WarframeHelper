@@ -10,7 +10,7 @@ from core import constants
 _config = Config()
 
 section_ocr = _config.addSection("OCR")
-section_ocr.addEntry("TESSERACT_PATH", r"C:\Program Files\Tesseract\tesseract.exe", "Path to your tesseract.exe")
+section_ocr.addEntry("TESSERACT_PATH", r"C:\Program Files\Tesseract-OCR\tesseract.exe", "Path to your tesseract.exe")
 
 section_gui = _config.addSection("GUI")
 section_gui.addEntry("HOTKEY", "alt+m", "The hotkey to press")

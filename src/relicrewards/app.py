@@ -1,6 +1,5 @@
 from datetime import datetime
 import os
-import sys
 
 from PIL import ImageGrab
 from PyQt5 import QtCore
@@ -14,6 +13,7 @@ from relicrewards import instance, warframe_ocr
 from core import constants, wfmarket_v2
 from PyQt5.Qt import Qt
 import traceback
+import time
 
 
 price_quantile = 0.3
@@ -89,6 +89,7 @@ class KeyboardThread(QThread):
             try:
                 hwnd = win32gui.FindWindow(None, r"Warframe")
                 win32gui.SetForegroundWindow(hwnd)
+                time.sleep(0.1)
                 if win32gui.GetForegroundWindow() != hwnd:
                     raise Exception("Could not set the Warframe window as foreground")
                 x1, y1, x2, y2 = win32gui.GetClientRect(hwnd)

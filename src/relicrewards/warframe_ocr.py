@@ -5,7 +5,6 @@ import pytesseract
 
 import numpy as np
 import math
-from concurrent.futures.process import ProcessPoolExecutor
 import os
 from relicrewards import instance
 import matplotlib
@@ -57,15 +56,18 @@ ref_spacing = 17
 # Process pool for tesseract paralellization
 _executor = None
 _ocr_item_to_ducats = None
+    
 
 def init():
     # first try if pytessaract works at all
     _ = pytesseract.image_to_string(np.zeros((50, 250)))
 
     global _executor
+    from concurrent.futures.process import ProcessPoolExecutor
     _executor = ProcessPoolExecutor(max_workers=4)
     # try using pytessaract in parallel
-    _ = list(_executor.map(pytesseract.image_to_string, (np.zeros((50, 250)) for _ in range(4))))
+    image_to_string = functools.partial(_image_to_string, name_list=[""])
+    _ = list(_executor.map(image_to_string, (np.zeros((50, 250)) for _ in range(4))))
 
     update_item_data()
 
@@ -272,6 +274,7 @@ def _image_to_string(tess_image, name_list):
             best = db_name
  
         if ldist == 0:
+            lmin = 0
             break
      
     if lmin > 4:
