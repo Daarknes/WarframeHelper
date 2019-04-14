@@ -1,7 +1,6 @@
 from datetime import datetime
 import os
 import sys
-import traceback
 
 from PIL import ImageGrab
 from PyQt5 import QtCore
@@ -17,7 +16,7 @@ from PyQt5.Qt import Qt
 
 
 price_quantile = 0.3
-PATH_IMAGES = os.path.join("..", "..", "images", "")
+PATH_IMAGES = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "images")) + os.path.sep
 
 class Window(QMainWindow):
     def __init__(self):
@@ -87,15 +86,16 @@ class KeyboardThread(QThread):
             keyboard.wait(instance.config["HOTKEY"])
             
             try:
-                hwnd = win32gui.FindWindow(None, r"Warframe")
+                hwnd = win32gui.FindWindow(None, r"Fotos")
                 win32gui.SetForegroundWindow(hwnd)
                 if win32gui.GetForegroundWindow() != hwnd:
                     raise Exception("Could not set the Warframe window as foreground")
                 x1, y1, x2, y2 = win32gui.GetClientRect(hwnd)
                 x1, y1 = win32gui.ClientToScreen(hwnd, (x1, y1))
                 x2, y2 = win32gui.ClientToScreen(hwnd, (x2, y2))
-            except:
-                print("could not find and focus the Warframe window. Stacktrace:\n", traceback.print_exc(file=sys.stdout))
+            except Exception as e:
+                print("could not find and focus the Warframe window. Stacktrace:")
+                print(e, file=sys.stderr)
                 continue
             
             for i in range(4):

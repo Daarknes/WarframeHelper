@@ -1,6 +1,5 @@
 from builtins import Exception
 import sys
-import traceback
 
 import cv2
 import pytesseract
@@ -17,9 +16,15 @@ from core.itemdata import Category
 # import matplotlib.pyplot as plt
 
 
-if not os.path.exists(instance.config["TESSERACT_PATH"]):
+if os.path.isdir(instance.config["TESSERACT_PATH"]):
+    _tess_path = os.path.join(instance.config["TESSERACT_PATH"], "tesseract.exe")
+else:
+    _tess_path = instance.config["TESSERACT_PATH"]
+
+if not os.path.exists(_tess_path):
     raise Exception("No tesseract.exe at '" + instance.config["TESSERACT_PATH"] + "'")
-pytesseract.pytesseract.tesseract_cmd = instance.config["TESSERACT_PATH"]
+pytesseract.pytesseract.tesseract_cmd = _tess_path
+del _tess_path
 
 # threshhold for the checkbox pattern matching which evaluates the number of players
 CHECKMARK_MATCH_THRESHHOLD = 0.15
@@ -238,13 +243,14 @@ def get_item_names(screenshot):
 #             plt.subplot(2, 1, 2)
 #             plt.imshow(tess_image, cmap="gray")
 #             plt.show()
-        
+
         image_to_string = functools.partial(_image_to_string, name_list=list(_ocr_item_to_ducats.keys()))
         item_names = list(_executor.map(image_to_string, tess_images))
         return item_names, [_ocr_item_to_ducats.get(name) for name in item_names]
-    except Exception:
-        print("[WF OCR] Error:\n", traceback.print_exc(file=sys.stdout))
-        return []
+    except Exception as e:
+        print("[WF OCR] Error:")
+        print(e, file=sys.stderr)
+        return [], []
 
 
 def _image_to_string(tess_image, name_list):    
