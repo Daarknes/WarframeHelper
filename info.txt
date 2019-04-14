@@ -1,9 +1,0 @@
-raw item data:
-https://raw.githubusercontent.com/WFCD/warframe-items/development/data/json/All.json
-Note: Those items are not tradable even though they are marked as such in the file:
-- Primed Sure Footed
-- Primed Vigor
-- Primed Shred
-Wrong Names:
-- Kavasa Prime Band -> Band
-- Kavasa Prime Buckle -> Buckle

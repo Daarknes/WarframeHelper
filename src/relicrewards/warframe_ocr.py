@@ -8,7 +8,7 @@ import math
 import os
 from relicrewards import instance
 import matplotlib
-from core import wikiscaper, itemdata
+from core import wikiscaper, itemdata, constants
 import functools
 from core.itemdata import Category
 import traceback
@@ -102,7 +102,7 @@ def _get_name_boxes(npimage):
     
     return boxes
 
-ref_checkmark_image = cv2.imread(os.path.join("..", "res", "checkmark.png"), 0)
+ref_checkmark_image = cv2.imread(constants.res_loc("relicrewards") + "checkmark.png", 0)
 #@benchmark
 def _get_num_players(parts_image, sw, sh):
     players_image_gray = cv2.cvtColor(parts_image, cv2.COLOR_RGB2GRAY)

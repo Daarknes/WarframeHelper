@@ -3,7 +3,7 @@ import os
 import json
 
 
-_FILE_LOC = constants.RES_LOC + "item_data.json"
+_FILE_LOC = constants.res_loc() + "item_data.json"
 
 _item_data = None
 _updated = False

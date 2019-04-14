@@ -118,6 +118,10 @@ class Scraper():
         
         weapons = {}
         for info in data.values():
+            # ignore atmosphere versions
+            if info['Type'] == "Arch-Gun (Atmosphere)":
+                continue
+
             relevant_info = {
                 "family": info['Family'] if 'Family' in info else info['Name'],
                 "type": info['Type'],

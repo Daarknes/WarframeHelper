@@ -19,7 +19,7 @@ class Window(QMainWindow):
         QMainWindow.__init__(self)
         
         self.setWindowTitle("Warframe Market Helper")
-        self.setWindowIcon(QIcon(constants.RES_LOC + "relic.png"))
+        self.setWindowIcon(QIcon(constants.res_loc() + "relic.png"))
         self.resize(QSize(1200, 700))
         self.setupUi()
     

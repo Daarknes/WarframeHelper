@@ -4,6 +4,7 @@
 *.psd
 
 images/
+images_1440p/
 images_1080p/
 
 # eclipse / IDE
@@ -14,10 +15,17 @@ images_1080p/
 # temp folder
 tmp/
 
+# resources
+res/
+!res/relic.png
+!res/relicrewards/checkmark.png
+
+# configs
+config/
+
 # other
 *.cfg
 *.cprof
-res/market_prices.json
 
 *.pdf
 *.aux
