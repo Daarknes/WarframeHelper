@@ -15,11 +15,6 @@ images_1080p/
 # temp folder
 tmp/
 
-# resources
-res/
-!res/relic.png
-!res/relicrewards/checkmark.png
-
 # configs
 config/
 
