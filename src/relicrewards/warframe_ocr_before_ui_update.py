@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from builtins import Exception
 
 import cv2
@@ -216,7 +218,7 @@ def update_item_data():
     for item_name, parts in wikiscaper.get_ducat_values(item_data[Category.RELICS]).items():
         for part_name, ducats in parts.items():
             full_name = item_name + " Prime " + part_name
-            if item_name+" Prime" in item_data[Category.WARFRAMES] and part_name != "Blueprint":
+            if (item_name+" Prime" in item_data[Category.WARFRAMES] or item_name+" Prime" in item_data[Category.ARCHWINGS]) and part_name != "Blueprint":
                 full_name += " Blueprint"
 
             _ocr_item_to_ducats[full_name.upper()] = ducats
