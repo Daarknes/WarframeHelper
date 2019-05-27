@@ -1,4 +1,6 @@
 import operator
+import os
+import fnmatch
 
 
 def batch_iter(lst, size):
@@ -45,6 +47,38 @@ def levenshtein_distance(s, t, costs=(1, 1, 1)):
                                  dist[row-1][col-1] + cost) # substitution    
  
     return dist[rows-1][cols-1]
+
+
+class BackupFile:
+    """
+    Context manager for writing a file with backups
+    """
+    def __init__(self, path, mode="wb", num_backups=5):
+        if mode not in ("wb", "w"):
+            raise Exception("BackupFile can only work in write mode (w or wb)")
+        
+        if os.path.exists(path):
+            base_path = os.path.dirname(path)
+            filename = os.path.basename(path)
+    
+            # get the file and all backups
+            files = [os.path.join(base_path, fn) for fn in sorted(fnmatch.filter(os.listdir(base_path), filename+"*"))]
+            # too many files -> delete oldest backup
+            if len(files) >= num_backups:
+                os.remove(files[-1])
+                files = files[:-1]
+
+            # rename the files (starting with the oldest)
+            for i in range(len(files)-1, -1, -1):
+                os.rename(files[i], os.path.join(base_path, filename+"~{}bak".format(i)))
+        
+        self._file = open(path, mode)
+
+    def __enter__(self):
+        return self._file
+    
+    def __exit__(self, exc_type, exc_value, traceback):
+        self._file.close()
 
 
 def _op(value1, value2, func):

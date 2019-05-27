@@ -57,8 +57,10 @@ class Window(QMainWindow):
                     item_buy_repr = instance.config["calc_buy_repr"](item_prices)
                     table_single.append({'Name': item_name, 'Sell': item_sell_repr, 'Buy': item_buy_repr, 'Potential Profit': calc_profit(item_sell_repr, item_buy_repr)})
 
-        wTabs.addTab(self.createTable(table_sets), "Sets")
-        wTabs.addTab(self.createTable(table_single), "Single Items")
+        if table_sets:
+            wTabs.addTab(self.createTable(table_sets), "Sets")
+        if table_single:
+            wTabs.addTab(self.createTable(table_single), "Single Items")
         
 #         wTabs.addTab(self.createRelicTable(market_names), "Relics")
 

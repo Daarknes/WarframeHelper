@@ -104,7 +104,7 @@ class KeyboardThread(QThread):
                 self.textSignal.emit(i, "...")
                 self.paletteSignal.emit(i, False)
             
-            image = ImageGrab.grab((x1, y1, x2, y2))   
+            image = ImageGrab.grab((x1, y1, x2, y2))
             if instance.config["save_screenshot"]:
                 if not os.path.exists(PATH_IMAGES):
                     os.makedirs(PATH_IMAGES)
