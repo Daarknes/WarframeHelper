@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 from builtins import Exception
 
 import cv2
@@ -9,10 +7,9 @@ import numpy as np
 import math
 import os
 from relicrewards import instance
-from core import wikiscaper, itemdata, constants
 import functools
-from core.itemdata import Category
 import traceback
+from util import utils
 # import matplotlib.pyplot as plt
 
 
@@ -27,7 +24,7 @@ if not os.path.exists(_tess_path):
 pytesseract.pytesseract.tesseract_cmd = _tess_path
 del _tess_path
 # tesseract config options: https://www.pyimagesearch.com/2018/09/17/opencv-ocr-and-text-recognition-with-tesseract/
-tessdata_dir = os.path.join(constants.res_loc(), "tessdata")
+#tessdata_dir = os.path.join(constants.res_loc(), "tessdata")
 tess_config = r"--psm 6 --oem 1" #r'--tessdata-dir "{}" -l eng --psm 6 --oem 1'.format(tessdata_dir)
 
 
@@ -40,11 +37,12 @@ def init():
     # first try if pytessaract works at all
     _ = pytesseract.image_to_string(np.zeros((50, 250)))
 
+    _create_item_data()
+
     global _executor
     from concurrent.futures.process import ProcessPoolExecutor
     _executor = ProcessPoolExecutor(max_workers=4)
-    
-    _create_item_data()
+    print("[WF OCR] initialized")
 
 
 def cleanup():
@@ -52,6 +50,9 @@ def cleanup():
 
 
 def _create_item_data():
+    from core import wikiscaper, itemdata
+    from core.itemdata import Category
+
     item_data = itemdata.item_data()
     
     global _ocr_item_to_ducats
@@ -73,9 +74,7 @@ ref_width, ref_height = 2560, 1440
 ref_ar = ref_height / float(ref_width)
 # y-coordinate / height references
 # part area
-ref_ymin, ref_ymax = 720, 787 #473, 787
-# item name area
-ref_ymin_name, ref_ymax_name = 574, 646
+ref_ymin, ref_ymax = 551, 612 # 726, 787
 # x-coordinate / width references
 # width of a part
 ref_part_width = 313
@@ -109,6 +108,16 @@ def _get_text_images(npimage):
     vsum[0] = vsum[-1] = 0
     # finite differences
     vdiff = vsum[1:] - vsum[:-1]
+
+#     plt.subplot(2, 2, 1)
+#     plt.imshow(mask, cmap="gray")
+#     plt.subplot(2, 2, 2)
+#     plt.imshow(text_blocks, cmap="gray")
+#       
+#     plt.subplot(2, 2, 3)
+#     plt.plot(vsum)
+#     plt.plot(vdiff)
+#     plt.show()
     
     def gen():
         xbounds = zip((vdiff > 0).nonzero()[0], (vdiff < 0).nonzero()[0])
@@ -150,7 +159,7 @@ def get_item_names(screenshot):
         traceback.print_exc()
         return [], []
 
-
+        
 def _image_to_string(tess_image, name_list):
     item_name = pytesseract.image_to_string(tess_image, config=tess_config)
 
@@ -159,7 +168,7 @@ def _image_to_string(tess_image, name_list):
     best = item_name
  
     for db_name in name_list:
-        ldist = levenshtein_distance(item_name, db_name, costs=(2, 2, 1))
+        ldist = utils.levenshtein_distance(item_name, db_name, costs=(2, 2, 1))
         if ldist < lmin:
             lmin = ldist
             best = db_name
@@ -167,48 +176,10 @@ def _image_to_string(tess_image, name_list):
         if ldist == 0:
             lmin = 0
             break
-     
+
     if lmin > 4:
         print("[WF OCR] '{}' is too far away from database (best match is '{}')".format(item_name, best))
         return "ERROR"
     else:
         return best
-
-
-def levenshtein_distance(s, t, costs=(1, 1, 1)):
-    """ 
-        iterative_levenshtein(s, t) -> ldist (int)
-        ldist is the Levenshtein distance between the strings s and t.
-        
-        costs: a tuple or a list with three integers (d, i, s) where
-                d defines the costs for a deletion
-                i defines the costs for an insertion and
-                s defines the costs for a substitution
-    """
-    rows = len(s)+1
-    cols = len(t)+1
-    deletes, inserts, substitutes = costs
-    
-    # For all i and j, dist[i,j] will contain the Levenshtein distance between the first i characters of s and the first j characters of t
-    dist = [[0 for _ in range(cols)] for _ in range(rows)]
-    # source prefixes can be transformed into empty strings 
-    # by deletions:
-    for row in range(1, rows):
-        dist[row][0] = row * deletes
-    # target prefixes can be created from an empty source string
-    # by inserting the characters
-    for col in range(1, cols):
-        dist[0][col] = col * inserts
-        
-    for col in range(1, cols):
-        for row in range(1, rows):
-            if s[row-1] == t[col-1]:
-                cost = 0
-            else:
-                cost = substitutes
-            dist[row][col] = min(dist[row-1][col] + deletes,
-                                 dist[row][col-1] + inserts,
-                                 dist[row-1][col-1] + cost) # substitution    
- 
-    return dist[rows-1][cols-1]
     
