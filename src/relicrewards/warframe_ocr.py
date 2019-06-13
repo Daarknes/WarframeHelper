@@ -83,6 +83,7 @@ ref_spacing = 10
 
 # part name color (HSV)
 ref_color_range = (np.array([13, 102, 170]), np.array([25, 120, 192]))
+ref_highlighted_color_range = (np.array([20, 60, 215]), np.array([25, 80, 250]))
 
 
 def _get_text_images(npimage):
@@ -101,7 +102,8 @@ def _get_text_images(npimage):
 
     hsv_image = cv2.cvtColor(npimage, cv2.COLOR_RGB2HSV)
     mask = cv2.inRange(hsv_image[ymin:ymax, xmin:xmin+max_width], *ref_color_range)
-
+    mask |= cv2.inRange(hsv_image[ymin:ymax, xmin:xmin+max_width], *ref_highlighted_color_range)
+    
     text_blocks = cv2.dilate(mask, np.ones((7, 9)), iterations=3)
     vsum = (np.sum(text_blocks, axis=0) > 0).astype(np.int)
     # just to be sure start and end exist
@@ -113,7 +115,7 @@ def _get_text_images(npimage):
 #     plt.imshow(mask, cmap="gray")
 #     plt.subplot(2, 2, 2)
 #     plt.imshow(text_blocks, cmap="gray")
-#       
+#         
 #     plt.subplot(2, 2, 3)
 #     plt.plot(vsum)
 #     plt.plot(vdiff)
