@@ -328,7 +328,7 @@ def get_update_date():
     return datetime.strptime(_market_data['last_update'], "%d-%m-%Y_%H-%M-%S")
 
 
-_warframe_parts = ["chassis", "systems", "neuroptics"]
+_blueprint_parts = ["chassis", "systems", "neuroptics", "wings", "harness"]
 _special_map = {
     "&": "and",
     "'": "",
@@ -337,7 +337,7 @@ _special_map = {
 def convert_to_market_name(item_name):
     words = item_name.lower().split()
     # Ember Prime Chassis Blueprint -> Ember Prime Chassis
-    if [word for word in words[:-1] if word in _warframe_parts]:
+    if [word for word in words[:-1] if word in _blueprint_parts]:
         words = words[:-1]
     market_name = "_".join(words)
     
