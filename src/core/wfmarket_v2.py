@@ -131,14 +131,14 @@ def _parse_price_data(data):
         # first filter on platform and visibility
         if order['visible']:
             if order['user']['status'] == "ingame":
-                prices[order['order_type']].append(order['platinum'])
+                prices[order['order_type']].append(int(order['platinum']))
             # otherwise check the time since last update of the order
             else:
                 last_updated = datetime.strptime(order['last_update'], "%Y-%m-%dT%H:%M:%S.%f+00:00")
                 delta = current_date - last_updated
                 order_age = delta.days * 24 + delta.seconds // 3600
                 if order_age < _config['MAX_ORDER_AGE']:
-                    prices[order['order_type']].append(order['platinum'])
+                    prices[order['order_type']].append(int(order['platinum']))
 
     prices['buy'].sort(reverse=True)
     prices['sell'].sort()
