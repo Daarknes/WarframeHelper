@@ -13,8 +13,8 @@ from core.config import Config
 from core.itemdata import Category
 from requests.exceptions import Timeout
 from util import utils
-from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 
 # _config
@@ -190,13 +190,16 @@ def _parse_category(parsed_items, wfm_items, component_list=None, filter_dict=No
 
 
 def _update_item_data():
+    """
+    updates market_item_data.json
+    """
     print("[WFMarket] Updating Item-data.")
     # request all warframe.market items
     response = requests.get("https://api.warframe.market/v1/items", headers={'Language': "en"})
     if response is None or response.status_code != requests.codes['ok']:
         raise Exception
 
-    wfm_items_raw = response.json()['payload']['items']['en']
+    wfm_items_raw = response.json()['payload']['items']
     wfm_items = {wfm_item['item_name']: wfm_item['url_name'] for wfm_item in wfm_items_raw}
     
     # stupid webpage errors
@@ -280,9 +283,9 @@ def _create_empty_market_data(items):
 # interface methods
 #===============================================================================
 def load(update_items=False):
-    # when we want to update the item-data or the market-item-data file doesn't exist, also update prices
-    if update_items or not os.path.exists(constants.MARKET_ITEM_DATA_LOC):
-        # don't update item-data when only the market-item-data didn't exist or it was just updated on load
+    # update prices when: update_items is True, the item-data didn't exist and was updated or the market-item-data file doesn't exist
+    if update_items or itemdata.updated() or not os.path.exists(constants.MARKET_ITEM_DATA_LOC):
+        # don't update item-data when it was just updated on load
         if update_items and not itemdata.updated():
             itemdata.update()
 

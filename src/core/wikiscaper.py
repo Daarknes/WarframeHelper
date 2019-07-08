@@ -8,7 +8,6 @@ from lxml import html
 import requests
 from requests.exceptions import Timeout
 import time
-import os
 
 
 def _get_dict_from_lua_source(code):
@@ -103,16 +102,11 @@ class Scraper():
         data['Twin Vipers Wraith']['Cost']['Parts'][1]['Name'] = "Receivers"
         data['Fluctus']['Cost']['Parts'][1]['Name'] = "Limbs"
         data['Rathbone']['Cost']['Parts'][0]['Name'] = "Head"
-        data['Ballistica Prime']['Traits'] = ["Prime"]
-        data['Kogake Prime']['Traits'] = ["Prime"]
-        data['Kronen Prime']['Traits'] = ["Prime"]
-        data['Tiberon Prime']['Traits'] = ["Prime"]
-        data['Akbolto Prime']['Traits'] = ["Prime"]
-        data['Nami Skyla Prime']['Traits'] = ["Prime"]
         data['Snipetron Vandal']['Traits'].append("Invasion Reward")
         data['Sheev']['Traits'].append("Invasion Reward")
         data['Dera Vandal']['Traits'].append("Invasion Reward")
         data['Agkuza']['Cost']['Parts'].append({"Name": "Guard", "Type": "Item", "Count": 1})
+        data['Regulators Prime']['Family'] = "Regulators"
     
         bonus_weapons = {"Gorgon Wraith", "Wolf Sledge", "Braton Vandal", "Lato Vandal", "Furax Wraith"}
         
@@ -128,8 +122,8 @@ class Scraper():
             }
             
             is_arch = info['Type'] == "Arch-Gun" or info['Type'] == "Arch-Melee"
-            is_trait = "Traits" in info and ("Prime" in info['Traits'] or "Invasion Reward" in info['Traits'])
-    
+            is_trait = " Prime" in info['Name'] or ("Traits" in info and "Invasion Reward" in info['Traits'])
+
             if "Cost" in info and (is_arch or is_trait or info['Name'] in bonus_weapons):
                 parts = {part['Name']: {"count": part['Count']} for part in info['Cost']['Parts'] if part['Type'] == "PrimePart" or part['Type'] == "Item"}
     
@@ -379,17 +373,22 @@ def get_ducat_values(relics):
     return rarity_by_reward
 
 
+
 # debugging
-_o_parse_data = Scraper._parse_data
-_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "tmp")) + os.path.sep + "{}.pick"
-def _open_data(_, url):
-    with open(_path.format(url[40:-5].lower()), "rb") as f:
-        return pickle.load(f)
-
-def _save_data(_, url):
-    data = _o_parse_data(url)
-    with open(_path.format(url[40:-5].lower()), "wb") as f:
-        pickle.dump(data, f)
-    return data
-
-#Scraper._parse_data = _open_data
+# import os
+# from core import constants
+# 
+# _o_parse_data = Scraper._parse_data
+# 
+# def _parse_data(_, url):
+#     path = constants.res_loc("tmp") + url[39:-5].lower() + ".pickle"
+#     if os.path.exists(path):
+#         with open(path, "rb") as f:
+#             return pickle.load(f)
+#     else:
+#         data = _o_parse_data(Scraper(), url)
+#         with open(path, "wb") as f:
+#             pickle.dump(data, f)
+#         return data
+# 
+# Scraper._parse_data = _parse_data

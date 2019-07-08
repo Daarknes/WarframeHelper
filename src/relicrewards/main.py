@@ -51,6 +51,7 @@ def excepthook(excType, excValue, tracebackobj):
     msg = '\n'.join(sections)
     sys.exit(str(msg))
 
+
 if __name__ == "__main__":
     # to show exceptions from Qt after crash
     sys.excepthook = excepthook
